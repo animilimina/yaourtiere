@@ -1,0 +1,25 @@
+reaction:
+  new:
+    - 🔴
+  clue:
+    - 🟠
+  good:
+    - 🟢
+  close:
+    - 🤏
+  bad:
+    - 👎
+    - 💩
+  yes:
+    - 👍
+  no:
+    - ❌
+thread:
+  - title: Deaf Test
+    id:
+      - dev: 12345
+        stage: 12345
+        prod: 12345
+    group: Deaf Test
+    rules: abc
+    sticky: abc

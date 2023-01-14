@@ -1,0 +1,57 @@
+import json
+from datetime import datetime, timezone
+from services.dynamodb import DynamodbItem
+
+
+class Tracker(DynamodbItem):
+    def __init__(self, interaction=None, task_info: str = ''):
+        self.__date = int(datetime.now(timezone.utc).strftime('%Y%m%d'))
+        self.__default_value = 'undefined'
+        self.__interaction = interaction
+        self.__task_info = task_info.split('.') if task_info else []
+        self.__counter_name = self.__set_counter_name()
+        super().__init__(item_type='activity_tracker',
+                         item_id=self.__date,
+                         get=False)
+
+    def __set_counter_name(self):
+        level_one = self.__get_activity_level_one()
+        level_two = self.__get_activity_level_two()
+        level_three = self.__get_activity_level_three()
+        return '.'.join([level_one, level_two, level_three])
+
+    def __get_activity_level_one(self) -> str:
+        output = self.__default_value
+        if self.__interaction:
+            output = 'interaction'
+        elif 0 <= len(self.__task_info):
+            output = self.__task_info[0]
+        return output
+
+    def __get_activity_level_two(self) -> str:
+        output = self.__default_value
+        if self.__interaction:
+            output = self.__interaction.type[0]
+        elif 1 < len(self.__task_info):
+            output = self.__task_info[1]
+        return output
+
+    def __get_activity_level_three(self) -> str:
+        output = self.__default_value
+        if self.__interaction:
+            output = self.__get_interaction_detail()
+        elif 2 < len(self.__task_info):
+            output = self.__task_info[2]
+        return output
+
+    def __get_interaction_detail(self) -> str:
+        output = self.__default_value
+        interaction_data = json.loads(json.dumps(self.__interaction.data))
+        if 'name' in interaction_data.keys():
+            output = interaction_data['name']
+        elif 'custom_id' in interaction_data.keys():
+            output = interaction_data['custom_id']
+        return output
+
+    async def track_activity(self):
+        self.increase_counter(self.__counter_name)
