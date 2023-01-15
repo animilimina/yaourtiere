@@ -1,5 +1,6 @@
 from config import config
 from datetime import datetime, timedelta, timezone
+from dateutil import tz
 from disnake.ext import commands, tasks
 from tools.archivist.logger import Logger
 from tools.text_importers import read_yaml
@@ -103,7 +104,16 @@ class ActiveThreads(commands.Cog):
         Builds a list of messages to post in the Open Threads channel
         """
 
-        self.__messages = ['']
+        instructions = f"""
+        Au {self.__date.astimezone(tz=tz.gettz('Europe/Paris')).strftime("%d/%m/%Y, %H:%M:%S")}, voici la liste des fils actifs sur ce serveur Discord.
+        
+        **__Légende :__**
+        > :{self.__settings["new"]["emoji"]}: = {self.__settings["new"]["description"]}
+        > :{self.__settings["up"]["emoji"]}: = {self.__settings["up"]["description"]}
+        > :{self.__settings["dying"]["emoji"]}: = {self.__settings["dying"]["description"]}
+        """
+
+        self.__messages = [instructions]
         for channel in self.__channel_threads:
             self.__complete_last_message('\n\n\n')
             self.__complete_last_message(channel["channel"].mention)
