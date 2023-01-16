@@ -2,14 +2,13 @@ import disnake
 from config import config
 from disnake.ext.commands import InteractionBot
 from tools.logger import Logger
-import json
 
 
 class Yaourtiere(InteractionBot):
     def __init__(self):
-        self.__guilds = [config.discord_guild]
+        self.guild = config.discord_guild
         self.__intents = self.__set_intents()
-        InteractionBot.__init__(self, test_guilds=self.__guilds, intents=self.__intents)
+        InteractionBot.__init__(self, test_guilds=[self.guild], intents=self.__intents)
         self.__cog_manager_name = 'cogs.cog_manager'
         self.__token = config.discord_bot_token
         self.__logger = None

@@ -1,6 +1,6 @@
-from .interactor import Interactor
-from .reporter import Reporter
-from .tracker import Tracker
+from tools.archivist.components.interactor import Interactor
+from tools.archivist.components.reporter import Reporter
+from tools.archivist.components.tracker import Tracker
 from tools.message_splitter import MessageSplitter
 
 
@@ -11,7 +11,7 @@ class Logger:
         self.__interaction = interaction
         self.__interactor = Interactor(self.__interaction) if self.__interaction else None
         self.__tracker = Tracker(self.__interaction, task_info)
-        self.__user = interaction.user.mention if interaction else None
+        self.__user = interaction.user.mention if interaction else ''
         self.__variables = self.__build_variable_dictionary()
         self.__log_group = log_group
         self.__message_start = self.__replace_variables(message_start)
@@ -19,7 +19,7 @@ class Logger:
 
     def __build_variable_dictionary(self):
         output = {
-            'user': self.__user if self.__user else None
+            'user': self.__user if self.__user else ''
         }
         return output
 
