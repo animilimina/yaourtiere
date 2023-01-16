@@ -70,18 +70,6 @@ class ActiveThreads(commands.Cog):
         self.__channel_threads = []
         threads = await self.__guild.active_threads()
 
-        # for thread in threads:
-        #     print(f"""
-        #     Channel: {thread.parent.name}
-        #     Thread: {thread.name}
-        #     Created: {thread.created_at}
-        #     Archive: {thread.archive_timestamp}
-        #     Last message: {await self.__get_last_message_date(thread)}
-        #     New: {self.__check_if_new(thread)}
-        #     Up: {self.__check_if_up(thread)}
-        #     Dying: {await self.__check_if_dying(thread)}
-        #     """)
-
         while threads:
             channel = threads[0].parent
             threads_channel = [thread for thread in threads if thread.parent == channel]
