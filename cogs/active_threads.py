@@ -54,7 +54,7 @@ class ActiveThreads(commands.Cog):
 
         self.__initialize_run()
         await self.__build_channel_thread_list()
-        self.__build_messages()
+        await self.__build_messages()
         await self.__clean_channel()
         await self.__update_channel()
 
@@ -70,13 +70,25 @@ class ActiveThreads(commands.Cog):
         self.__channel_threads = []
         threads = await self.__guild.active_threads()
 
+        # for thread in threads:
+        #     print(f"""
+        #     Channel: {thread.parent.name}
+        #     Thread: {thread.name}
+        #     Created: {thread.created_at}
+        #     Archive: {thread.archive_timestamp}
+        #     Last message: {await self.__get_last_message_date(thread)}
+        #     New: {self.__check_if_new(thread)}
+        #     Up: {self.__check_if_up(thread)}
+        #     Dying: {await self.__check_if_dying(thread)}
+        #     """)
+
         while threads:
             channel = threads[0].parent
             threads_channel = [thread for thread in threads if thread.parent == channel]
 
             channel_dictionary = {
                 "channel": channel,
-                "threads": [thread for thread in threads_channel if not self.__thread_is_dead(thread)]
+                "threads": [thread for thread in threads_channel if not await self.__thread_is_dead(thread)]
             }
             if len(channel_dictionary["threads"]) > 0:
                 self.__channel_threads.append(channel_dictionary)
@@ -84,21 +96,30 @@ class ActiveThreads(commands.Cog):
             for thread in threads_channel:
                 threads.remove(thread)
 
-    def __thread_is_dead(self, thread):
-        archive_date = self.__get_archive_date(thread)
+        return
+
+    async def __thread_is_dead(self, thread):
+        archive_date = await self.__get_archive_date(thread)
         return archive_date < datetime.now(tz=timezone.utc)
 
-    @staticmethod
-    def __get_archive_date(thread) -> datetime:
+    async def __get_archive_date(self, thread) -> datetime:
         up_timestamp = thread.archive_timestamp
         try:
-            last_message = thread.last_message.created_at
+            last_message = await self.__get_last_message_date(thread)
         except:
             last_message = up_timestamp
         last_activity = last_message if last_message > up_timestamp else up_timestamp
         return last_activity + timedelta(minutes=thread.auto_archive_duration)
 
-    def __build_messages(self) -> None:
+    @staticmethod
+    async def __get_last_message_date(thread) -> datetime:
+        message_list = []
+        async for item in thread.history(limit=1):
+            message_list.append(item)
+        last_message = message_list[0]
+        return last_message.created_at
+
+    async def __build_messages(self) -> None:
 
         """
         Builds a list of messages to post in the Open Threads channel
@@ -122,7 +143,7 @@ class ActiveThreads(commands.Cog):
                 thread_string = f"\n> {thread.mention}"
                 thread_string += self.__check_if_new(thread)
                 thread_string += self.__check_if_up(thread)
-                thread_string += self.__check_if_dying(thread)
+                thread_string += await self.__check_if_dying(thread)
                 self.__complete_last_message(thread_string)
 
         return
@@ -149,22 +170,22 @@ class ActiveThreads(commands.Cog):
 
     def __check_if_new(self, thread) -> str:
         parameters = self.__settings["new"]
-        hours_since_creation = (self.__date - thread.create_timestamp).total_seconds() / 3600
+        hours_since_creation = (self.__date - thread.created_at).total_seconds() / 3600
         hours_for_emoji = parameters["hours"]
         output = f" :{parameters['emoji']}:" if hours_since_creation < hours_for_emoji else ''
         return output
 
     def __check_if_up(self, thread) -> str:
         parameters = self.__settings["up"]
-        not_new = thread.archive_timestamp > thread.create_timestamp
+        thread_is_new = thread.archive_timestamp + timedelta(minutes=-5) < thread.created_at
         hours_since_up = (self.__date - thread.archive_timestamp).total_seconds() / 3600
         hours_for_emoji = parameters["hours"]
-        output = f" :{parameters['emoji']}:" if hours_since_up < hours_for_emoji and not_new else ''
+        output = f" :{parameters['emoji']}:" if hours_since_up < hours_for_emoji and not thread_is_new else ''
         return output
 
-    def __check_if_dying(self, thread) -> str:
+    async def __check_if_dying(self, thread) -> str:
         parameters = self.__settings["dying"]
-        archive_date = self.__get_archive_date(thread)
+        archive_date = await self.__get_archive_date(thread)
         hours_until_archive = (archive_date - self.__date).total_seconds() / 3600
         hours_for_emoji = parameters["hours"]
         output = f" :{parameters['emoji']}:" if hours_until_archive < hours_for_emoji else ''
