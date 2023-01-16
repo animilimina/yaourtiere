@@ -83,7 +83,6 @@ class ActiveThreads(commands.Cog):
 
             for thread in threads_channel:
                 threads.remove(thread)
-
         return
 
     async def __thread_is_dead(self, thread):
