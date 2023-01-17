@@ -2,7 +2,7 @@ channel:
   prod: 941250672811212810
   stage: 1064162849552867348
   dev: 1064163022949589043
-message_length: 2000
+max_message_length: 2000
 new:
   hours: 72
   emoji: new
