@@ -14,7 +14,9 @@ class ActiveThreads(commands.Cog):
         self.__settings = self.__read_settings()
         self.__channel_to_update = self.__bot.get_channel(self.__settings["channel"][config.working_environment])
         self.__date = datetime.now(tz=timezone.utc)
-        self.__channel_threads = []
+        self.__threads = []
+        self.__channels_and_threads_dictionaries = []
+        self.__instructions = ''
         self.__messages = ['']
         self.refresh_open_threads_list.start()
 
@@ -39,35 +41,30 @@ class ActiveThreads(commands.Cog):
         await logger.log_start()
 
         self.__initialize_run()
-        await self.__build_channel_thread_list()
-        await self.__build_message_list()
+        await self.__collect_channels_and_threads()
+        self.__build_message_list()
         await self.__update_active_threads_channel()
 
         await logger.log_success()
         return
 
-    async def __build_channel_thread_list(self) -> None:
-        self.__channel_threads = []
-        threads = await self.__guild.active_threads()
+    async def __collect_channels_and_threads(self) -> None:
+        await self.__get_threads_info()
+        self.__build_channels_and_threads_list()
 
-        while threads:
-            channel = threads[0].parent
-            threads_channel = [thread for thread in threads if thread.parent == channel]
-
-            channel_dictionary = {
-                "channel": channel,
-                "threads": [thread for thread in threads_channel if not await self.__thread_is_dead(thread)]
+    async def __get_threads_info(self) -> None:
+        self.__threads = []
+        threads_raw = await self.__guild.active_threads()
+        for thread in threads_raw:
+            thread_dict = {
+                "channel": thread.parent,
+                "mention": thread.mention,
+                "creation_date": thread.created_at,
+                "up_date": thread.archive_timestamp,
+                "archive_date": await self.__get_thread_archive_date(thread)
             }
-
-            if len(channel_dictionary["threads"]) > 0:
-                self.__channel_threads.append(channel_dictionary)
-
-            for thread in threads_channel:
-                threads.remove(thread)
-
-    async def __thread_is_dead(self, thread) -> bool:
-        archive_date = await self.__get_thread_archive_date(thread)
-        return archive_date < datetime.now(tz=timezone.utc)
+            thread_dict["is_dead"] = thread_dict["archive_date"] < datetime.now(tz=timezone.utc)
+            self.__threads.append(thread_dict)
 
     async def __get_thread_archive_date(self, thread) -> datetime:
         up_timestamp = thread.archive_timestamp
@@ -75,8 +72,24 @@ class ActiveThreads(commands.Cog):
             last_message = await self.__get_thread_last_message_date(thread)
         except:
             last_message = up_timestamp
-        last_activity = last_message if last_message > up_timestamp else up_timestamp
+        last_activity = max(last_message, up_timestamp)
         return last_activity + timedelta(minutes=thread.auto_archive_duration)
+
+    def __build_channels_and_threads_list(self):
+        self.__channels_and_threads_dictionaries = []
+        while self.__threads:
+            channel = self.__threads[0]["channel"]
+            threads_channel = [thread for thread in self.__threads if thread["channel"] == channel]
+            channel_dictionary = {
+                "channel": channel,
+                "threads": [thread for thread in threads_channel if not thread["is_dead"]]
+            }
+
+            if len(channel_dictionary["threads"]) > 0:
+                self.__channels_and_threads_dictionaries.append(channel_dictionary)
+
+            for thread in threads_channel:
+                self.__threads.remove(thread)
 
     @staticmethod
     async def __get_thread_last_message_date(thread) -> datetime:
@@ -86,8 +99,14 @@ class ActiveThreads(commands.Cog):
         last_message = message_list[0]
         return last_message.created_at
 
-    async def __build_message_list(self) -> None:
-        instructions = f"""
+    def __build_message_list(self) -> None:
+        self.__update_instructions_string()
+        self.__messages = [self.__instructions]
+        for channel_and_threads in self.__channels_and_threads_dictionaries:
+            self.__add_channel_and_threads_to_messages(channel_and_threads)
+
+    def __update_instructions_string(self) -> None:
+        self.__instructions = f"""
 Au {self.__date.astimezone(tz=tz.gettz('Europe/Paris')).strftime("%d/%m/%Y, %H:%M:%S")} (heure de Paris), voici la liste des fils actifs sur ce serveur Discord.
 
 **__Légende :__**
@@ -96,19 +115,12 @@ Au {self.__date.astimezone(tz=tz.gettz('Europe/Paris')).strftime("%d/%m/%Y, %H:%
 > :{self.__settings["dying"]["emoji"]}: = {self.__settings["dying"]["description"]}
         """
 
-        self.__messages = [instructions]
-        for channel in self.__channel_threads:
-            self.__complete_last_message('\n\n\n')
-            self.__complete_last_message(channel["channel"].mention)
+    def __add_channel_and_threads_to_messages(self, channel_and_threads: dict) -> None:
+        self.__complete_last_message('\n\n\n')
+        self.__complete_last_message(channel_and_threads["channel"].mention)
 
-            for thread in channel["threads"]:
-                thread_string = f"\n> {thread.mention}"
-                thread_string += self.__add_new_emoji_if_required(thread)
-                thread_string += self.__add_up_emoji_if_required(thread)
-                thread_string += await self.__add_dying_emoji_if_required(thread)
-                self.__complete_last_message(thread_string)
-
-        return
+        for thread in channel_and_threads["threads"]:
+            self.__add_thread_to_messages(thread)
 
     def __complete_last_message(self, string_to_add) -> None:
         last_message_length = len(self.__messages[-1])
@@ -119,28 +131,31 @@ Au {self.__date.astimezone(tz=tz.gettz('Europe/Paris')).strftime("%d/%m/%Y, %H:%
         else:
             self.__messages.append(string_to_add)
 
+    def __add_thread_to_messages(self, thread) -> None:
+        thread_string = f"\n> {thread['mention']}"
+        thread_string += self.__add_new_emoji_if_required(thread)
+        thread_string += self.__add_up_emoji_if_required(thread)
+        thread_string += self.__add_dying_emoji_if_required(thread)
+        self.__complete_last_message(thread_string)
+
     def __add_new_emoji_if_required(self, thread) -> str:
         parameters = self.__settings["new"]
-        hours_since_creation = (self.__date - thread.created_at).total_seconds() / 3600
+        hours_since_creation = (self.__date - thread["creation_date"]).total_seconds() / 3600
         hours_for_emoji = parameters["hours"]
-        output = f" :{parameters['emoji']}:" if hours_since_creation < hours_for_emoji else ""
-        return output
+        return f" :{parameters['emoji']}:" if hours_since_creation < hours_for_emoji else ""
 
     def __add_up_emoji_if_required(self, thread) -> str:
         parameters = self.__settings["up"]
-        thread_is_new = thread.archive_timestamp + timedelta(minutes=-5) < thread.created_at
-        hours_since_up = (self.__date - thread.archive_timestamp).total_seconds() / 3600
+        thread_is_new = thread["up_date"] + timedelta(minutes=-5) < thread["creation_date"]
+        hours_since_up = (self.__date - thread["up_date"]).total_seconds() / 3600
         hours_for_emoji = parameters["hours"]
-        output = f" :{parameters['emoji']}:" if hours_since_up < hours_for_emoji and not thread_is_new else ""
-        return output
+        return f" :{parameters['emoji']}:" if hours_since_up < hours_for_emoji and not thread_is_new else ""
 
-    async def __add_dying_emoji_if_required(self, thread) -> str:
+    def __add_dying_emoji_if_required(self, thread) -> str:
         parameters = self.__settings["dying"]
-        archive_date = await self.__get_thread_archive_date(thread)
-        hours_until_archive = (archive_date - self.__date).total_seconds() / 3600
+        hours_until_archive = (thread["archive_date"] - self.__date).total_seconds() / 3600
         hours_for_emoji = parameters["hours"]
-        output = f" :{parameters['emoji']}:" if hours_until_archive < hours_for_emoji else ""
-        return output
+        return f" :{parameters['emoji']}:" if hours_until_archive < hours_for_emoji else ""
 
     async def __update_active_threads_channel(self) -> None:
         await self.__delete_old_messages()
@@ -153,6 +168,7 @@ Au {self.__date.astimezone(tz=tz.gettz('Europe/Paris')).strftime("%d/%m/%Y, %H:%
     async def __send_new_messages(self) -> None:
         for message in self.__messages:
             await self.__channel_to_update.send(message)
+
 
 def setup(bot):
     bot.add_cog(ActiveThreads(bot))
