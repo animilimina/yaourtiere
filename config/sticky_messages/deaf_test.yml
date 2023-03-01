@@ -1,6 +1,16 @@
 channel_id:
   - 935625593167441920 #dev
   - 1028052466345988198 #stage
-body: "Bienvenue sur le Deaf Test!
+body:
+embed:
+  title: Deaf Test
+  description: "Le but est de trouver le jeu dont est tiré une image (complète ou partielle). Celui qui donne la bonne réponse devient le nouvau maître du jeu.
 
-On explique les règles et les pastilles ici."
+
+Le maître du jeu anime la partie avec des réactions sous les messages:
+
+🔴 début du jeu | | :orange_circle: indice supplémentaire | | 🟢 bonne réponse
+
+👎 :poucebasrouge: 💩 mauvaise réponse | | 🤏 on s'approche (bonne série)
+
+En réponse à une question: :correct: :correct_anim: :poucehautvert: oui | | ❌ :Faux: :Faux_anim: non"
