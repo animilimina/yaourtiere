@@ -1,7 +1,7 @@
 from config import config
 from datetime import datetime, timedelta, timezone
 from dateutil import tz
-from disnake import AllowedMentions
+from disnake import AllowedMentions, Embed
 from disnake.ext import commands, tasks
 from tools.archivist.logger import Logger
 from tools.text_importers import read_yaml
@@ -40,7 +40,14 @@ class StickyMessage(commands.Cog):
 
         settings_list = self.__get_settings(message.channel.id)
         settings = settings_list[0]
-        await message.channel.send(content=settings['body'],
+        sticky_body = settings['body']
+        sticky_embed = None
+        if settings["embed"]:
+            sticky_embed = Embed(
+                title=settings["embed"]["title"],
+                description=settings["embed"]["description"]
+            )
+        await message.channel.send(content=sticky_body, embed=sticky_embed,
                                    allowed_mentions=AllowedMentions(everyone=False, users=False))
 
         await logger.log_success()
