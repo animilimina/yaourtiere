@@ -3,6 +3,7 @@ import os
 from disnake.ext import commands
 from tools.authorisations import AuthorisationManager
 from tools.logger import Logger
+from tools.message_splitter import MessageSplitter
 
 
 class CogManager(commands.Cog):
@@ -77,29 +78,19 @@ class CogManager(commands.Cog):
         self.__cogs_loaded = [cog for cog in self.__cogs_loaded if cog not in self.__cogs_reloaded]
 
     async def __log_cogs_unloaded_reloaded_loaded(self):
+        message_full = ''
         if self.__cogs_unloaded:
-            await self.__log_cogs_unloaded()
+            message_full += "\n__Les cogs suivants ont été déchargés__```\n" + "\n".join(self.__cogs_unloaded) + "```"
         if self.__cogs_reloaded:
-            await self.__log_cogs_reloaded()
+            message_full += "\n__Les cogs suivants ont été rechargés__```\n" + "\n".join(self.__cogs_reloaded) + "```"
         if self.__cogs_loaded:
-            await self.__log_cogs_loaded()
+            message_full += "\n__Les cogs suivants ont été chargés__```\n" + "\n".join(self.__cogs_loaded) + "```"
         if not self.__cogs_loaded and not self.__cogs_reloaded and not self.__cogs_unloaded:
             await self.__logger.log("Aucun cog n'a été affecté par l'action")
-
-    async def __log_cogs_unloaded(self):
-        await self.__logger.log("__Les cogs suivants ont été déchargés__")
-        for cog in self.__cogs_unloaded:
-            await self.__logger.log(cog)
-
-    async def __log_cogs_reloaded(self):
-        await self.__logger.log("__Les cogs suivants ont été rechargés__")
-        for cog in self.__cogs_reloaded:
-            await self.__logger.log(cog)
-
-    async def __log_cogs_loaded(self):
-        await self.__logger.log("__Les cogs suivants ont été chargés__")
-        for cog in self.__cogs_loaded:
-            await self.__logger.log(cog)
+        else:
+            message_split = MessageSplitter(message_full).get_message_split()
+            for message in message_split:
+                await self.__logger.log(message)
 
     @commands.slash_command(description="Réservé aux admins. Recharge le cog manager.")
     async def reload_cog_manager(self, inter):

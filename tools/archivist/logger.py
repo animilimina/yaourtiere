@@ -11,6 +11,7 @@ class Logger:
         self.__interaction = interaction
         self.__interactor = Interactor(self.__interaction) if self.__interaction else None
         self.__tracker = Tracker(self.__interaction, task_info)
+        self.__activity_was_tracked = False
         self.__user = interaction.user.mention if interaction else ''
         self.__variables = self.__build_variable_dictionary()
         self.__log_group = log_group
@@ -29,7 +30,9 @@ class Logger:
         return text
 
     async def log_start(self):
-        await self.__tracker.track_activity()
+        if not self.__activity_was_tracked:
+            await self.__tracker.track_activity()
+            self.__activity_was_tracked = True
         if self.__interactor:
             await self.__interactor.defer()
         await self.__logger.log(f"{self.__log_group}: {self.__message_start}")
@@ -44,6 +47,9 @@ class Logger:
             await self.__logger.log(sub_message)
 
     async def log_success(self):
+        if not self.__activity_was_tracked:
+            await self.__tracker.track_activity()
+            self.__activity_was_tracked = True
         if self.__interactor:
             await self.__interactor.success()
         await self.__logger.log(f"{self.__log_group}: {self.__message_success}")
