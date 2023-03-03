@@ -10,7 +10,18 @@ class StickyMessage(commands.Cog):
     def __init__(self, bot):
         self.__bot = bot
         self.__settings_directory = constants.DIRECTORY_STICKY_MESSAGES
+        self.__create_settings_directory()
         self.__settings = self.__read_settings()
+
+    def __create_settings_directory(self) -> None:
+        directory_split = self.__settings_directory.split('/')
+        current_layer = []
+        for layer in directory_split:
+            current_layer.append(layer)
+            try:
+                os.mkdir('/'.join(current_layer))
+            except:
+                pass
 
     def __read_settings(self) -> list:
         output = []
