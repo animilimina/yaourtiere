@@ -22,6 +22,26 @@ class StickyMessage(commands.Cog):
             output.append(file_content)
         return output
 
+    @commands.slash_command()
+    async def create_sticky_message(self, interaction, name: str, channel_id: int, title: str, content: str):
+        return
+
+    @commands.slash_command()
+    async def add_channel_to_sticky_message(self, interaction, name: str, channel_id: int = None):
+        return
+
+    @commands.slash_command()
+    async def list_sticky_messages(self, interaction):
+        return
+
+    @commands.slash_command()
+    async def delete_sticky_message(self, interaction, name):
+        return
+
+    @commands.slash_command()
+    async def check_sticky_message(self, interaction, name):
+        return
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if self.__there_is_nothing_to_do(message):

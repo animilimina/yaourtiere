@@ -7,3 +7,4 @@
 pyenv.cfg
 ../../yaourtiere/.env
 /notebooks/
+/config_ignore/

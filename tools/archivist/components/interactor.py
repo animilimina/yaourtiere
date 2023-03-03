@@ -1,4 +1,5 @@
 from disnake import AllowedMentions
+from tools.text_importers import read_yaml
 
 
 class Interactor:
@@ -17,6 +18,14 @@ class Interactor:
         """
 
         await self.__interaction.response.defer(with_message=True)
+
+    def authorize(self, *groups: str) -> bool:
+        user_groups = read_yaml('config/user_groups.yml')
+        output = False
+        for group in groups:
+            output = True if self.__interaction.user.id in user_groups[group] else output
+        return output
+
 
     async def reject(self) -> None:
         """

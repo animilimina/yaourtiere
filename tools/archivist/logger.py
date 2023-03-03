@@ -5,8 +5,8 @@ from tools.message_splitter import MessageSplitter
 
 
 class Logger:
-    def __init__(self, bot, log_group: str = '', message_start: str = '', message_success: str = '',
-                 interaction=None, task_info: str = ''):
+    def __init__(self, bot, task_info: str, log_group: str = '', message_start: str = '', message_success: str = '',
+                 interaction=None):
         self.__logger = Reporter(bot)
         self.__interaction = interaction
         self.__interactor = Interactor(self.__interaction) if self.__interaction else None
@@ -35,9 +35,17 @@ class Logger:
             self.__activity_was_tracked = True
         if self.__interactor:
             await self.__interactor.defer()
-        await self.__logger.log(f"{self.__log_group}: {self.__message_start}")
+        await self.__logger.log(
+            f"{self.__log_group} : {self.__message_start}" if self.__log_group else self.__message_start)
 
-    async def log_rejection(self):
+    async def interaction_is_authorized(self, *groups: str) -> bool:
+        if not self.__interactor.authorize(*groups):
+            await self.__log_rejection()
+            return False
+        else:
+            return True
+
+    async def __log_rejection(self):
         await self.__interactor.reject()
         await self.__logger.reject(self.__user)
 
@@ -52,4 +60,5 @@ class Logger:
             self.__activity_was_tracked = True
         if self.__interactor:
             await self.__interactor.success()
-        await self.__logger.log(f"{self.__log_group}: {self.__message_success}")
+        await self.__logger.log(
+            f"{self.__log_group} : {self.__message_success}" if self.__log_group else self.__message_success)

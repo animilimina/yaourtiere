@@ -1,7 +1,7 @@
 import disnake
 from config import config
 from disnake.ext.commands import InteractionBot
-from tools.logger import Logger
+from tools.archivist.logger import Logger
 from tools.message_splitter import MessageSplitter
 
 
@@ -12,7 +12,6 @@ class Yaourtiere(InteractionBot):
         InteractionBot.__init__(self, test_guilds=[self.guild], intents=self.__intents)
         self.__cog_manager_name = 'cogs.cog_manager'
         self.__token = config.discord_bot_token
-        self.__logger = None
 
     @staticmethod
     def __set_intents():
@@ -24,15 +23,19 @@ class Yaourtiere(InteractionBot):
         self.run(self.__token)
 
     async def on_ready(self):
-        self.__logger = Logger(self)
-        await self.__logger.log("**========== LE BOT A REDÉMARRÉ ==========**")
+        logger = Logger(
+            self,
+            message_start="**========== LE BOT A REDÉMARRÉ ==========**",
+            task_info='task.bot.start'
+        )
+        await logger.log_start()
         if self.__cog_manager_name not in self.extensions:
             self.load_extension('cogs.cog_manager')
         message_full = "__Les cogs suivants ont été chargés au lancement__```\n" + "\n".join(
             [extension.split('.')[-1] for extension in self.extensions]) + "```"
         message_split = MessageSplitter(message_full).get_message_split()
         for message in message_split:
-            await self.__logger.log(message)
+            await logger.log_message(message)
 
 
 Yaourtiere().run_bot()
