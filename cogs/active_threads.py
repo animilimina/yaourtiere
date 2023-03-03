@@ -1,9 +1,8 @@
-from config import config
 from datetime import datetime, timedelta, timezone
 from dateutil import tz
 from disnake.ext import commands, tasks
 from tools.archivist.logger import Logger
-from tools.text_importers import read_yaml
+from tools.text_managers import read_yaml
 
 
 class ActiveThreads(commands.Cog):

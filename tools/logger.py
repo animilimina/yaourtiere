@@ -1,7 +1,6 @@
 # Legacy module to drop ASAP
 
 import disnake
-from config import config
 
 
 class Logger:

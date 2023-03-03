@@ -1,5 +1,5 @@
 from disnake import AllowedMentions
-from tools.text_importers import read_yaml
+from tools.text_managers import read_yaml
 
 
 class Interactor:
@@ -25,7 +25,6 @@ class Interactor:
         for group in groups:
             output = True if self.__interaction.user.id in user_groups[group] else output
         return output
-
 
     async def reject(self) -> None:
         """

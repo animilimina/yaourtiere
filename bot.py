@@ -1,5 +1,4 @@
 import disnake
-from config import config
 from disnake.ext.commands import InteractionBot
 from tools.archivist.logger import Logger
 from tools.message_splitter import MessageSplitter

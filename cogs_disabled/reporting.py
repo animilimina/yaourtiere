@@ -1,10 +1,9 @@
 import disnake
 import inspect
 from disnake.ext import commands, tasks
-from config import config
 from tools.logger import Logger
 from services.dynamodb import DynamodbExtractor, DynamodbItem
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 
 
 class ActivityTracker(DynamodbItem):

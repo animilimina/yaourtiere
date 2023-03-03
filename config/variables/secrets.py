@@ -1,5 +1,7 @@
-from config import environment_builder
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
 
 working_environment = os.environ['soj_working_environment']
 

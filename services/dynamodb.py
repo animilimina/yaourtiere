@@ -1,6 +1,5 @@
 import boto3
 from boto3.dynamodb.conditions import Key
-from config import config
 
 
 class DynamodbManager:

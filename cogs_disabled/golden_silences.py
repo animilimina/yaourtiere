@@ -1,5 +1,4 @@
 import disnake
-from config import config
 from tools.authorisations import AuthorisationManager
 from datetime import datetime, timezone
 from disnake import TextInputStyle, Embed
@@ -7,7 +6,7 @@ from disnake.ext import commands
 from disnake.ui import Button, View
 from services.dynamodb import DynamodbItem
 from tools.logger import Logger
-from tools.text_importers import read_yaml
+from tools.text_managers import read_yaml
 
 top_config = read_yaml('config/golden_silences.yml')
 

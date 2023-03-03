@@ -1,6 +1,6 @@
 import disnake
 from tools.archivist.logger import Logger
-from tools.text_importers import read_yaml
+from tools.text_managers import read_yaml
 
 
 class AuthorisationManager:

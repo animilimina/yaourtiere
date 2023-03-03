@@ -1,0 +1,1 @@
+DIRECTORY_STICKY_MESSAGES = 'config_ignore/sticky_messages/'

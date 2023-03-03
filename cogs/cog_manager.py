@@ -1,4 +1,3 @@
-import disnake
 import os
 from disnake.ext import commands
 from tools.authorisations import AuthorisationManager
