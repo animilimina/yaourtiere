@@ -1,4 +1,5 @@
 from disnake import AllowedMentions
+from tools.text_managers import read_yaml
 
 
 class Interactor:
@@ -18,11 +19,18 @@ class Interactor:
 
         await self.__interaction.response.defer(with_message=True)
 
+    def authorize(self, *groups: str) -> bool:
+        user_groups = read_yaml('config/user_groups.yml')
+        output = False
+        for group in groups:
+            output = True if self.__interaction.user.id in user_groups[group] else output
+        return output
+
     async def reject(self) -> None:
         """
         Send rejection message to user
         """
-        await self.__send_feedback(f"❌ {self.__user}, tu n'es pas autorisé à utiliser cette commande.")
+        await self.__send_feedback(f"⛔️ {self.__user}, tu n'es pas autorisé à utiliser cette commande.")
 
     async def __send_feedback(self, message) -> None:
         """
@@ -41,3 +49,8 @@ class Interactor:
         """
         await self.__send_feedback(f"✅ {self.__user}, ta commande a réussi.")
 
+    async def failure(self) -> None:
+        """
+        Send a failure message to the user
+        """
+        await self.__send_feedback(f"❌ {self.__user}, ta commande a échoué")

@@ -1,8 +1,4 @@
-from config import config
 from disnake.ext import commands, tasks
-from tools.authorisations import AuthorisationManager
-from tools.logger import Logger
-from tools.text_importers import read_yaml
 
 
 class TestCollector:

@@ -1,7 +1,6 @@
-from datetime import datetime, timezone
-from disnake import TextInputStyle, Embed
+from disnake import Embed
 from disnake.ext import commands
-from config import config
+
 
 class TestClass(commands.Cog):
     def __init__(self, bot):

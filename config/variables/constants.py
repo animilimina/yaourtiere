@@ -1,0 +1,1 @@
+DIRECTORY_STICKY_MESSAGES = 'config/sticky_message/'
