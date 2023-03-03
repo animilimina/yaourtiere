@@ -7,4 +7,4 @@
 pyenv.cfg
 ../../yaourtiere/.env
 /notebooks/
-/config/sticky_message/
+/config/sticky_message/*
