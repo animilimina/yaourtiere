@@ -1,7 +1,6 @@
 from config.variables import secrets
 from disnake.ext.commands import InteractionBot
 from tools.archivist.logger import Logger
-from tools.message_splitter import MessageSplitter
 import disnake
 
 
@@ -31,11 +30,9 @@ class Yaourtiere(InteractionBot):
         await logger.log_start()
         if self.__cog_manager_name not in self.extensions:
             self.load_extension('cogs.cog_manager')
-        message_full = "__Les cogs suivants ont été chargés au lancement__```\n" + "\n".join(
+        message = "__Les cogs suivants ont été chargés au lancement__```\n" + "\n".join(
             [extension.split('.')[-1] for extension in self.extensions]) + "```"
-        message_split = MessageSplitter(message_full).get_message_split()
-        for message in message_split:
-            await logger.log_message(message)
+        await logger.log_message(message)
 
 
 Yaourtiere().run_bot()

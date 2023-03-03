@@ -2,7 +2,6 @@ import os
 from disnake.ext import commands
 from tools.authorisations import AuthorisationManager
 from tools.archivist.logger import Logger
-from tools.message_splitter import MessageSplitter
 
 
 class CogManager(commands.Cog):
@@ -83,19 +82,17 @@ class CogManager(commands.Cog):
         self.__cogs_loaded = [cog for cog in self.__cogs_loaded if cog not in self.__cogs_reloaded]
 
     async def __log_cogs_unloaded_reloaded_loaded(self):
-        message_full = ''
+        message = ''
         if self.__cogs_unloaded:
-            message_full += "\n__Les cogs suivants ont été déchargés__```\n" + "\n".join(self.__cogs_unloaded) + "```"
+            message += "\n__Les cogs suivants ont été déchargés__```\n" + "\n".join(self.__cogs_unloaded) + "```"
         if self.__cogs_reloaded:
-            message_full += "\n__Les cogs suivants ont été rechargés__```\n" + "\n".join(self.__cogs_reloaded) + "```"
+            message += "\n__Les cogs suivants ont été rechargés__```\n" + "\n".join(self.__cogs_reloaded) + "```"
         if self.__cogs_loaded:
-            message_full += "\n__Les cogs suivants ont été chargés__```\n" + "\n".join(self.__cogs_loaded) + "```"
+            message += "\n__Les cogs suivants ont été chargés__```\n" + "\n".join(self.__cogs_loaded) + "```"
         if not self.__cogs_loaded and not self.__cogs_reloaded and not self.__cogs_unloaded:
             await self.__logger.log_message("Aucun cog n'a été affecté par l'action")
         else:
-            message_split = MessageSplitter(message_full).get_message_split()
-            for message in message_split:
-                await self.__logger.log_message(message)
+            await self.__logger.log_message(message)
 
     @commands.slash_command(description="Réservé aux admins. Recharge le cog manager.")
     async def reload_cog_manager(self, inter):

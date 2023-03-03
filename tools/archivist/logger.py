@@ -6,7 +6,7 @@ from tools.message_splitter import MessageSplitter
 
 class Logger:
     def __init__(self, bot, task_info: str, log_group: str = '', message_start: str = '', message_success: str = '',
-                 interaction=None):
+                 message_failure: str = '', interaction=None):
         self.__logger = Reporter(bot)
         self.__interaction = interaction
         self.__interactor = Interactor(self.__interaction) if self.__interaction else None
@@ -17,6 +17,7 @@ class Logger:
         self.__log_group = log_group
         self.__message_start = self.__replace_variables(message_start)
         self.__message_success = self.__replace_variables(message_success)
+        self.__message_failure = self.__replace_variables(message_failure)
 
     def __build_variable_dictionary(self):
         output = {
@@ -30,13 +31,18 @@ class Logger:
         return text
 
     async def log_start(self):
-        if not self.__activity_was_tracked:
-            await self.__tracker.track_activity()
-            self.__activity_was_tracked = True
+        self.__track_activity()
         if self.__interactor:
             await self.__interactor.defer()
-        await self.__logger.log(
-            f"{self.__log_group} : {self.__message_start}" if self.__log_group else self.__message_start)
+        await self.__log(self.__message_start)
+
+    async def __log(self, message):
+        await self.__logger.log(f"{self.__log_group} : {message}" if self.__log_group else message)
+
+    def __track_activity(self):
+        if not self.__activity_was_tracked:
+            self.__tracker.track_activity()
+            self.__activity_was_tracked = True
 
     async def interaction_is_authorized(self, *groups: str) -> bool:
         if not self.__interactor.authorize(*groups):
@@ -55,10 +61,13 @@ class Logger:
             await self.__logger.log(sub_message)
 
     async def log_success(self):
-        if not self.__activity_was_tracked:
-            await self.__tracker.track_activity()
-            self.__activity_was_tracked = True
+        self.__track_activity()
         if self.__interactor:
             await self.__interactor.success()
-        await self.__logger.log(
-            f"{self.__log_group} : {self.__message_success}" if self.__log_group else self.__message_success)
+        await self.__log(self.__message_success)
+
+    async def log_failure(self):
+        self.__track_activity()
+        if self.__interactor:
+            await self.__interactor.failure()
+        await self.__log(self.__message_failure)
