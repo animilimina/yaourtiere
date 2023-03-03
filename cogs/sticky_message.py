@@ -12,7 +12,7 @@ class StickyMessage(commands.Cog):
         self.__settings_directory = constants.DIRECTORY_STICKY_MESSAGES
         self.__settings = self.__read_settings()
 
-    def __read_settings(self) -> dict:
+    def __read_settings(self) -> list:
         output = []
         for file in self.__get_file_list():
             file_content = read_yaml(self.__settings_directory + file)
@@ -20,8 +20,11 @@ class StickyMessage(commands.Cog):
         return output
 
     def __get_file_list(self) -> list:
-        files = os.listdir(self.__settings_directory)
-        return [file for file in files if file[-4:] == '.yml' and file != 'template.yml']
+        try:
+            files = os.listdir(self.__settings_directory)
+            return [file for file in files if file[-4:] == '.yml' and file != 'template.yml']
+        except:
+            return []
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -68,8 +71,7 @@ class StickyMessage(commands.Cog):
         return embed
 
     @commands.slash_command()
-    async def sticky_create(self, inter, message_id: str, name: str,
-                                    title: str = '', channel_id: str = ''):
+    async def sticky_create(self, inter, message_id: str, name: str, title: str = '', channel_id: str = ''):
         logger = Logger(
             self.__bot,
             log_group='Commande',
@@ -142,7 +144,3 @@ class StickyMessage(commands.Cog):
 
 def setup(bot):
     bot.add_cog(StickyMessage(bot))
-
-
-def a(a: int, b: int, *c: str):
-    print(list(c))
