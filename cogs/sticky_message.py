@@ -2,7 +2,7 @@ from config.variables import constants
 from disnake import AllowedMentions, Embed
 from disnake.ext import commands
 from tools.archivist.logger import Logger
-from tools.text_managers import read_yaml
+from tools.text_managers import read_yaml, write_yaml
 import os
 
 
@@ -14,9 +14,9 @@ class StickyMessage(commands.Cog):
 
     def __read_settings(self) -> dict:
         output = []
-        files = os.listdir(directory)
+        files = os.listdir(self.__settings_directory)
         for file in [file for file in files if file[-4:] == '.yml' and file != 'template.yml']:
-            file_content = read_yaml(directory + file)
+            file_content = read_yaml(self.__settings_directory + file)
             output.append(file_content)
         return output
 
@@ -68,23 +68,24 @@ class StickyMessage(commands.Cog):
             )
         return embed
 
-    @commands.slash_command()
-    async def create_sticky_message(self, interaction, name: str, channel_ids: [int] = None, message: str = None,
-                                    embed_title: str = None, embed_content: str = None):
-        # check if name doesn't already exist
-        # if yes, warn user, display current and new versions, ask if [keep, replace, rename new]
-        message_settings = {
-            channel_id: channel_ids
-            body: message,
-            embed: {
-                title: embed_title,
-                description: embed_content
-            }
-        }
-        # Write file
-        # Refresh settings
-        # Display embed
-        return
+    # @commands.slash_command()
+    # async def create_sticky_message(self, interaction, name: str, channel_ids: [int] = None, message: str = None,
+    #                                 embed_title: str = None, embed_content: str = None):
+    #     # check if name doesn't already exist
+    #     # if yes, warn user, display current and new versions, ask if [keep, replace, rename new]
+    #     # message_settings = {
+    #     #     "channel_id": channel_ids,
+    #     #     "body": message,
+    #     #     "embed": {
+    #     #         "title": embed_title,
+    #     #         "description": embed_content
+    #     #     }
+    #     # }
+    #     # file_path = self.__settings_directory + name + '.yml'
+    #     # write_yaml(message_settings, file_path)
+    #     # Refresh settings
+    #     # Display embed
+    #     return
 
     @commands.slash_command()
     async def add_channel_to_sticky_message(self, interaction, name: str, channel_id: int = None):
@@ -96,7 +97,7 @@ class StickyMessage(commands.Cog):
         return
 
     @commands.slash_command()
-    async def list_channels_with_sticky_messages(self, interaction):
+    async def list_sicky_channels(self, interaction):
         return
 
     @commands.slash_command()

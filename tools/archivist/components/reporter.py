@@ -1,3 +1,4 @@
+from config.variables import secrets
 from disnake import AllowedMentions
 
 
@@ -6,7 +7,7 @@ class Reporter:
     Reports activity in the bot log thread
     """
     def __init__(self, bot):
-        self.__channel = bot.get_channel(config.log_thread)
+        self.__channel = bot.get_channel(secrets.log_thread)
 
     async def log(self, message) -> None:
         """

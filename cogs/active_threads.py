@@ -1,3 +1,4 @@
+from config.variables import secrets
 from datetime import datetime, timedelta, timezone
 from dateutil import tz
 from disnake.ext import commands, tasks
@@ -11,7 +12,7 @@ class ActiveThreads(commands.Cog):
         self.__bot = bot
         self.__guild = self.__bot.guilds[0]
         self.__settings = self.__read_settings()
-        self.__channel_to_update = self.__bot.get_channel(self.__settings["channel"][config.working_environment])
+        self.__channel_to_update = self.__bot.get_channel(self.__settings["channel"][secrets.working_environment])
         self.__date = datetime.now(tz=timezone.utc)
         self.__threads = []
         self.__channels_and_threads_dictionaries = []

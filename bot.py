@@ -1,16 +1,17 @@
-import disnake
+from config.variables import secrets
 from disnake.ext.commands import InteractionBot
 from tools.archivist.logger import Logger
 from tools.message_splitter import MessageSplitter
+import disnake
 
 
 class Yaourtiere(InteractionBot):
     def __init__(self):
-        self.guild = config.discord_guild
+        self.guild = secrets.discord_guild
         self.__intents = self.__set_intents()
         InteractionBot.__init__(self, test_guilds=[self.guild], intents=self.__intents)
         self.__cog_manager_name = 'cogs.cog_manager'
-        self.__token = config.discord_bot_token
+        self.__token = secrets.discord_bot_token
 
     @staticmethod
     def __set_intents():
