@@ -110,7 +110,7 @@ class StickyMessage(commands.Cog):
             text = message.content
         except:
             await logger.log_message(
-                f"""Le message dont l'id est {message_id} n'a pas été trouvé dans {inter.channe.mention}""")
+                f"""Le message dont l'id est {message_id} n'a pas été trouvé dans {inter.channel.mention}""")
             await logger.log_failure()
             return
 
@@ -161,7 +161,7 @@ class StickyMessage(commands.Cog):
             text = message.content
         except:
             await logger.log_message(
-                f"""Le message dont l'id est {message_id} n'a pas été trouvé dans {inter.channe.mention}""")
+                f"""Le message dont l'id est {message_id} n'a pas été trouvé dans {inter.channel.mention}""")
             return
 
         message_settings = [settings for settings in self.__settings if settings["name"] == name][0]
