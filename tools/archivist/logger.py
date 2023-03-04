@@ -43,7 +43,7 @@ class Logger:
 
     async def __log(self, emoji: str, message: str):
         text = emoji
-        text += ' ' + self.__log_group + ':' if self.__log_group else ''
+        text += ' ' + self.__log_group + ' :' if self.__log_group else ''
         text += ' ' + message
         await self.__logger.log(text)
 
