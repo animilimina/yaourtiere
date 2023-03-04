@@ -35,7 +35,7 @@ class ActiveThreads(commands.Cog):
             log_group='Tâche automatisée ',
             message_start=f'Mise à jour du salon {self.__channel_to_update.mention}.',
             message_success=f'Mise à jour du salon {self.__channel_to_update.mention} terminée.',
-            task_info='task.update.active threads'
+            task_info='task.active threads.update'
         )
 
         await logger.log_start()

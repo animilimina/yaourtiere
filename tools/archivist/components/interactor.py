@@ -1,30 +1,23 @@
-from disnake import AllowedMentions
-from tools.text_managers import read_yaml
-
+from disnake import AllowedMentions, Interaction
+from disnake import Interaction
 
 class Interactor:
     """
     Slash command management
     """
 
-    def __init__(self, interaction):
+    def __init__(self, interaction: Interaction = None):
         self.__interaction = interaction
-        self.__user = self.__interaction.user.mention
+        self.__user = self.__interaction.user.mention if interaction else None
+        self.__allowed_mentions = AllowedMentions(everyone=False, users=False)
         self.__seconds_before_feedback_deletion = 2
 
     async def defer(self) -> None:
         """
         Send feedback to user while command is being processed
         """
-
-        await self.__interaction.response.defer(with_message=True)
-
-    def authorize(self, *groups: str) -> bool:
-        user_groups = read_yaml('config/user_groups.yml')
-        output = False
-        for group in groups:
-            output = True if self.__interaction.user.id in user_groups[group] else output
-        return output
+        if self.__interaction:
+            await self.__interaction.response.defer(with_message=True)
 
     async def reject(self) -> None:
         """
@@ -38,10 +31,9 @@ class Interactor:
 
         :param message: Message sent to the user
         """
-
-        await self.__interaction.edit_original_message(message,
-                                                       allowed_mentions=AllowedMentions(everyone=False, users=False))
-        await self.__interaction.delete_original_message(delay=self.__seconds_before_feedback_deletion)
+        if self.__interaction:
+            await self.__interaction.edit_original_message(message, allowed_mentions=self.__allowed_mentions)
+            await self.__interaction.delete_original_message(delay=self.__seconds_before_feedback_deletion)
 
     async def success(self) -> None:
         """

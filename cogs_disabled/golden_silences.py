@@ -1,5 +1,4 @@
 import disnake
-from tools.authorisations import AuthorisationManager
 from datetime import datetime, timezone
 from disnake import TextInputStyle, Embed
 from disnake.ext import commands
@@ -166,17 +165,15 @@ class PrivateMessage(commands.Cog):
         self.__current_member = None
         self.__members_contacted = 0
         self.__interaction = None
-        self.__authorisation_manager = None
 
-    @commands.slash_command(description=f"{top_config['title']}: Demander au bot d'envoyer le MP à "
-                                        f"tous les membres du serveur.")
+    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
     async def golden_silences_everyone(self, inter):
+        f"""
+        {top_config['title']}: Demander au bot d'envoyer le MP à tous les membres du serveur.
+        """
         await self.__logger.log(
             f"{top_config['title']}: {inter.user.mention} a demandé l'envoi du MP à tous les membres du serveur")
-        self.__set_interaction(inter)
-        if not self.__authorisation_manager.interaction_user_is_in_group('bot_admin'):
-            await self.__authorisation_manager.reject_interaction()
-            return
+        self.__interaction = inter
 
         self.__populate_view()
         for member in self.__bot.get_all_members():
@@ -188,10 +185,6 @@ class PrivateMessage(commands.Cog):
 
         await self.__logger.log(f"{top_config['title']}: Le MP été envoyé à {self.__members_contacted} membre(s).")
         await inter.response.send_message(f"Le MP a été envoyé à {self.__members_contacted} membre(s).")
-
-    def __set_interaction(self, interaction):
-        self.__interaction = interaction
-        self.__authorisation_manager = AuthorisationManager(self.__interaction)
 
     def __populate_view(self):
         self.__view = View()

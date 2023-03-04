@@ -1,4 +1,4 @@
-from disnake import Embed
+from disnake import Embed, Permissions
 from disnake.ext import commands
 
 
@@ -7,7 +7,11 @@ class TestClass(commands.Cog):
         self.__bot = bot
 
     @commands.slash_command()
-    async def test_command(self, interaction):
+    async def test_embed(self, interaction):
+        """
+        Une description en docstring pour ma fonction.
+        """
+
         embed = Embed(
             title="Un titre pour mon embed",
             description="""
@@ -22,6 +26,10 @@ Le maître du jeu anime la partie avec des réactions sous les messages:
         )
         print(interaction.channel.id)
         await interaction.response.send_message('', embed=embed)
+
+    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
+    async def test_droits(self, inter):
+        await inter.response.send_message('coucou')
 
 
 def setup(bot):

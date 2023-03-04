@@ -1,6 +1,6 @@
 import os
+from disnake import Permissions
 from disnake.ext import commands
-from tools.authorisations import AuthorisationManager
 from tools.archivist.logger import Logger
 
 
@@ -39,8 +39,11 @@ class CogManager(commands.Cog):
             self.__bot.load_extension(self.__cog_directory + '.' + self.__current_cog)
             self.__cogs_loaded.append(self.__current_cog)
 
-    @commands.slash_command(description="Réservé aux admins. Recharge les cogs (sauf le cog manager).")
+    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
     async def reload_all_cogs(self, inter):
+        """
+        Recharge les cogs (sauf le manager).
+        """
         self.__logger = Logger(
             self.__bot,
             log_group='Commande ',
@@ -50,8 +53,6 @@ class CogManager(commands.Cog):
             task_info='command.bot.reload cogs'
         )
         await self.__logger.log_start()
-        if not await self.__logger.interaction_is_authorized('bot_admin'):
-            return
 
         self.__unload_all_cogs()
         self.__refresh_cog_list()
@@ -60,10 +61,6 @@ class CogManager(commands.Cog):
         await self.__log_cogs_unloaded_reloaded_loaded()
 
         await self.__logger.log_success()
-
-    def __set_interaction(self, interaction):
-        self.__interaction = interaction
-        self.__authorisation_manager = AuthorisationManager(self.__interaction)
 
     def __unload_all_cogs(self):
         self.__cogs_unloaded = []
@@ -94,8 +91,11 @@ class CogManager(commands.Cog):
         else:
             await self.__logger.log_message(message)
 
-    @commands.slash_command(description="Réservé aux admins. Recharge le cog manager.")
+    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
     async def reload_cog_manager(self, inter):
+        """
+        Recharge le cog manager.
+        """
         self.__logger = Logger(
             self.__bot,
             log_group='Commande ',
@@ -105,8 +105,6 @@ class CogManager(commands.Cog):
             task_info='command.bot.reload cog manager'
         )
         await self.__logger.log_start()
-        if not await self.__logger.interaction_is_authorized('bot_admin'):
-            return
 
         cog_manager = 'cogs.' + self.__this_cog
         self.__bot.unload_extension(cog_manager)
