@@ -8,3 +8,8 @@ pyenv.cfg
 ../../yaourtiere/.env
 /notebooks/
 /config/sticky_message/*
+
+# Exclude all roles but admin
+!/config/roles/
+/config/roles/*
+!/config/roles/admin.yml

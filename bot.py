@@ -27,7 +27,7 @@ class Yaourtiere(InteractionBot):
             message_start="**========== LE BOT A REDÉMARRÉ ==========**",
             task_info='task.bot.start'
         )
-        await logger.log_start()
+        await logger.log_start(show_emoji=False)
         if self.__cog_manager_name not in self.extensions:
             self.load_extension('cogs.cog_manager')
         message = "__Les cogs suivants ont été chargés au lancement__```\n" + "\n".join(
