@@ -32,7 +32,7 @@ class ActiveThreads(commands.Cog):
     async def refresh_open_threads_list(self) -> None:
         logger = Logger(
             self.__bot,
-            log_group='Tâche automatisée ',
+            log_group='Tâche',
             message_start=f'Mise à jour du salon {self.__channel_to_update.mention}.',
             message_success=f'Mise à jour du salon {self.__channel_to_update.mention} terminée.',
             task_info='task.active threads.update'

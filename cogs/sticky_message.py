@@ -1,6 +1,6 @@
 from config.variables import constants
 from disnake import AllowedMentions, Embed, Permissions
-from disnake.abc import GuildChannel
+from disnake import TextChannel
 from disnake.ext import commands
 from tools.archivist.logger import Logger
 from tools.text_managers import read_yaml, write_yaml
@@ -46,7 +46,7 @@ class StickyMessage(commands.Cog):
 
         logger = Logger(
             self.__bot,
-            log_group='Tâche automatisée ',
+            log_group='Tâche',
             message_success=f'Sticky message rafraîchi dans {message.channel.mention}.',
             task_info='task.sticky.update'
         )
@@ -78,13 +78,13 @@ class StickyMessage(commands.Cog):
     @staticmethod
     def __build_embed(settings: dict) -> Embed:
         embed = Embed(
-            title=settings["title"],
+            title="" + settings["title"],
             description=settings["description"]
         )
         return embed
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_create(self, inter, name: str, message_id: str, title: str = '', channel: GuildChannel = None):
+    async def sticky_create(self, inter, name: str, message_id: str, title: str = '', channel: TextChannel = None):
         """
         Crée un sticky à partir d'un message de ce canal.
         """
@@ -177,7 +177,7 @@ class StickyMessage(commands.Cog):
         return
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_channel_add(self, inter, name: str, channel: GuildChannel):
+    async def sticky_channel_add(self, inter, name: str, channel: TextChannel):
         """
         Associe un canal à un sticky.
         """
@@ -216,7 +216,7 @@ class StickyMessage(commands.Cog):
         return
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_channel_remove(self, inter, channel: GuildChannel):
+    async def sticky_channel_remove(self, inter, channel: TextChannel):
         """
         Retire un canal du sticky auquel il est associé.
         """
