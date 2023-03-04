@@ -1,15 +1,14 @@
-import disnake
 import os
+from disnake import Permissions
 from disnake.ext import commands
-from tools.authorisations import AuthorisationManager
-from tools.logger import Logger
+from tools.archivist.logger import Logger
 
 
 class CogManager(commands.Cog):
     def __init__(self, bot):
         self.__bot = bot
-        self.__logger = Logger(self.__bot)
         self.__this_cog = os.path.basename(__file__).split('.')[0]
+        self.__logger = None
         self.__cog_directory = 'cogs'
         self.__cog_list = []
         self.__current_cog = ''
@@ -40,25 +39,28 @@ class CogManager(commands.Cog):
             self.__bot.load_extension(self.__cog_directory + '.' + self.__current_cog)
             self.__cogs_loaded.append(self.__current_cog)
 
-    @commands.slash_command(description="Réservé aux admins. Recharge les cogs (sauf le cog manager).")
+    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
     async def reload_all_cogs(self, inter):
-        self.__set_interaction(inter)
-        await self.__interaction.response.defer()
-        await self.__logger.log(self.__interaction.author.mention + " a demandé rechargement des cogs.")
-        if not self.__authorisation_manager.interaction_user_is_in_group('bot_admin'):
-            await self.__authorisation_manager.reject_interaction()
-            return
+        """
+        Recharge les cogs (sauf le manager).
+        """
+        self.__logger = Logger(
+            self.__bot,
+            log_group='Commande ',
+            message_start=f'{inter.author.mention} a demandé le rechargement des cogs.',
+            message_success=f'Rechargement des cogs terminé.',
+            interaction=inter,
+            task_info='command.bot.reload cogs'
+        )
+        await self.__logger.log_start()
+
         self.__unload_all_cogs()
         self.__refresh_cog_list()
         self.__load_all_cogs()
         self.__classify_cogs_unloaded_reloaded_loaded()
         await self.__log_cogs_unloaded_reloaded_loaded()
-        await self.__interaction.edit_original_response("La recharge des cogs est terminée.")
-        await self.__interaction.delete_original_response(delay=2)
 
-    def __set_interaction(self, interaction):
-        self.__interaction = interaction
-        self.__authorisation_manager = AuthorisationManager(self.__interaction)
+        await self.__logger.log_success()
 
     def __unload_all_cogs(self):
         self.__cogs_unloaded = []
@@ -77,44 +79,38 @@ class CogManager(commands.Cog):
         self.__cogs_loaded = [cog for cog in self.__cogs_loaded if cog not in self.__cogs_reloaded]
 
     async def __log_cogs_unloaded_reloaded_loaded(self):
+        message = ''
         if self.__cogs_unloaded:
-            await self.__log_cogs_unloaded()
+            message += "\n__Les cogs suivants ont été déchargés__```\n" + "\n".join(self.__cogs_unloaded) + "```"
         if self.__cogs_reloaded:
-            await self.__log_cogs_reloaded()
+            message += "\n__Les cogs suivants ont été rechargés__```\n" + "\n".join(self.__cogs_reloaded) + "```"
         if self.__cogs_loaded:
-            await self.__log_cogs_loaded()
+            message += "\n__Les cogs suivants ont été chargés__```\n" + "\n".join(self.__cogs_loaded) + "```"
         if not self.__cogs_loaded and not self.__cogs_reloaded and not self.__cogs_unloaded:
-            await self.__logger.log("Aucun cog n'a été affecté par l'action")
+            await self.__logger.log_message("Aucun cog n'a été affecté par l'action")
+        else:
+            await self.__logger.log_message(message)
 
-    async def __log_cogs_unloaded(self):
-        await self.__logger.log("__Les cogs suivants ont été déchargés__")
-        for cog in self.__cogs_unloaded:
-            await self.__logger.log(cog)
-
-    async def __log_cogs_reloaded(self):
-        await self.__logger.log("__Les cogs suivants ont été rechargés__")
-        for cog in self.__cogs_reloaded:
-            await self.__logger.log(cog)
-
-    async def __log_cogs_loaded(self):
-        await self.__logger.log("__Les cogs suivants ont été chargés__")
-        for cog in self.__cogs_loaded:
-            await self.__logger.log(cog)
-
-    @commands.slash_command(description="Réservé aux admins. Recharge le cog manager.")
+    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
     async def reload_cog_manager(self, inter):
-        self.__set_interaction(inter)
-        await self.__interaction.response.defer()
-        await self.__logger.log(self.__interaction.author.mention + " a demandé un rechargement du cog manager.")
-        if not self.__authorisation_manager.interaction_user_is_in_group('bot_admin'):
-            await self.__authorisation_manager.reject_interaction()
-            return
+        """
+        Recharge le cog manager.
+        """
+        self.__logger = Logger(
+            self.__bot,
+            log_group='Commande ',
+            message_start=f'{inter.author.mention} a demandé le rechargement du cog manager.',
+            message_success=f'Rechargement du cog manager terminé.',
+            interaction=inter,
+            task_info='command.bot.reload cog manager'
+        )
+        await self.__logger.log_start()
+
         cog_manager = 'cogs.' + self.__this_cog
         self.__bot.unload_extension(cog_manager)
         self.__bot.load_extension(cog_manager)
-        await self.__logger.log("Le cog manager a été rechargé.")
-        await self.__interaction.edit_original_response("Le cog manager a été rechargé.")
-        await self.__interaction.delete_original_response(delay=2)
+
+        await self.__logger.log_success()
 
 
 def setup(bot):

@@ -53,5 +53,5 @@ class Tracker(DynamodbItem):
             output = interaction_data['custom_id']
         return output
 
-    async def track_activity(self):
+    def track_activity(self):
         self.increase_counter(self.__counter_name)

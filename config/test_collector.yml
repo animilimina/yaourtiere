@@ -10,16 +10,20 @@ reaction:
   bad:
     - 👎
     - 💩
+    - poucebasrouge
   yes:
-    - 👍
+    - correct
+    - correct_anim
+    - poucehautvert
   no:
     - ❌
+    - Faux
+    - Faux_anim
 thread:
   - title: Deaf Test
     id:
-      - dev: 12345
+      - dev: 935625593167441920
         stage: 12345
         prod: 12345
     group: Deaf Test
-    rules: abc
-    sticky: abc
+    sticky: deaf_test
