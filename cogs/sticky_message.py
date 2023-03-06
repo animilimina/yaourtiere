@@ -51,13 +51,14 @@ class StickyMessage(commands.Cog):
             task_info='task.sticky.update'
         )
 
-        async for previous_message in message.channel.history(limit=10):
-            if previous_message.author == self.__bot.user:
-                await previous_message.delete()
-
         settings_list = self.__get_settings(message.channel.id)
         settings = settings_list[0]
         sticky_embed = self.__build_embed(settings)
+
+        async for previous_message in message.channel.history(limit=10):
+            if previous_message.author == self.__bot.user and previous_message.embeds[0] ==  sticky_embed:
+                await previous_message.delete()
+
         await message.channel.send(embed=sticky_embed,
                                    allowed_mentions=AllowedMentions(everyone=False, users=False))
 
