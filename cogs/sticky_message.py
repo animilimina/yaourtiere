@@ -51,12 +51,12 @@ class StickyMessage(commands.Cog):
             task_info='task.sticky.update'
         )
 
-        settings_list = self.__get_settings(message.channel.id)
+        settings_list = self.__get_settings_from_channel(message.channel.id)
         settings = settings_list[0]
         sticky_embed = self.__build_embed(settings)
 
         async for previous_message in message.channel.history(limit=10):
-            if previous_message.author == self.__bot.user and previous_message.embeds[0] ==  sticky_embed:
+            if previous_message.author == self.__bot.user and previous_message.embeds[0] == sticky_embed:
                 await previous_message.delete()
 
         await message.channel.send(embed=sticky_embed,
@@ -68,12 +68,12 @@ class StickyMessage(commands.Cog):
     def __there_is_nothing_to_do(self, message) -> bool:
         if message.author == self.__bot.user:
             return True
-        settings_list = self.__get_settings(message.channel.id)
+        settings_list = self.__get_settings_from_channel(message.channel.id)
         if not settings_list:
             return True
         return False
 
-    def __get_settings(self, channel_id):
+    def __get_settings_from_channel(self, channel_id):
         return [settings for settings in self.__settings if channel_id in settings['channel_id']]
 
     @staticmethod
@@ -116,7 +116,7 @@ class StickyMessage(commands.Cog):
             return
 
         channel_id = channel.id if channel else None
-        if channel_id and len(self.__get_settings(channel_id)) > 0:
+        if channel_id and len(self.__get_settings_from_channel(channel_id)) > 0:
             await logger.log_message(f"""{channel.mention} est déjà associé à un sticky.""")
             await logger.log_failure()
             return
@@ -200,7 +200,7 @@ class StickyMessage(commands.Cog):
             return
 
         channel_id = channel.id
-        if len(self.__get_settings(channel_id)) > 0:
+        if len(self.__get_settings_from_channel(channel_id)) > 0:
             await logger.log_message(f"""{channel.mention} est déjà associé à un sticky.""")
             await logger.log_failure()
             return
@@ -232,7 +232,7 @@ class StickyMessage(commands.Cog):
         await logger.log_start()
 
         channel_id = channel.id
-        if len(self.__get_settings(channel_id)) > 0:
+        if len(self.__get_settings_from_channel(channel_id)) > 0:
             message_settings = [settings for settings in self.__settings if channel_id in settings["channel_id"]][0]
             channel_list = message_settings["channel_id"]
             channel_list.pop(channel_list.index(channel_id))
@@ -249,7 +249,7 @@ class StickyMessage(commands.Cog):
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
     async def sticky_list(self, inter):
         """
-        Liste tous les sticky existants et les channels associés.
+        Liste tous les sticky existants et les canaux associés.
         """
         logger = Logger(
             self.__bot,
@@ -284,7 +284,7 @@ class StickyMessage(commands.Cog):
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
     async def sticky_check(self, inter, name):
         """
-        Affiche un sticky et les channels associés.
+        Affiche un sticky et les canaux associés.
         """
         logger = Logger(
             self.__bot,
