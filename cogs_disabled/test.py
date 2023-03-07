@@ -7,23 +7,17 @@ class TestClass(commands.Cog):
         self.__bot = bot
 
     @commands.slash_command()
-    async def test_embed(self, interaction):
+    async def test(self, interaction, something: str):
         """
         Une description en docstring pour ma fonction.
         """
+        for item in something.split(' '):
+            print(item)
+        await interaction.response.send_message("bla")
 
-        embed = Embed(
-            title="Un titre pour mon embed",
-            description="Un body pour mon embed",
-            colour=0xF0C43F
-        )
-        embed.set_author(name='sticky')
-        # print(interaction.channel.id)
-        await interaction.response.send_message('', embed=embed)
-
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def test_droits(self, inter):
-        await inter.response.send_message('coucou')
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction, user):
+        print(reaction.emoji)
 
 
 def setup(bot):
