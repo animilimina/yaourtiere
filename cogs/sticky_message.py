@@ -232,8 +232,9 @@ class StickyMessage(commands.Cog):
         await logger.log_start()
 
         channel_id = channel.id
-        if len(self.__get_settings_from_channel(channel_id)) > 0:
-            message_settings = [settings for settings in self.__settings if channel_id in settings["channel_id"]][0]
+        settings_list = self.__get_settings_from_channel(channel_id)
+        if len(settings_list) > 0:
+            message_settings = settings_list[0]
             channel_list = message_settings["channel_id"]
             channel_list.pop(channel_list.index(channel_id))
 
