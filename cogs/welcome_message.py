@@ -17,7 +17,7 @@ class WelcomeMessage(Cog):
         logger: Logger = Logger(
             self.__bot,
             log_group='Tâche',
-            message_start=f"""{member.mention} a rejoint le serveur.""",
+            message_start=f"""{member.mention} a rejoint le serveur. Un message de bienvenue va lui être envoyé.""",
             message_success=f"""Un message de bienvenue a été envoyé à {member.mention}.""",
             message_failure=f"""Echec de l'envoi du message de bienvenue à {member.mention}.""",
             task_info='task.private.welcome',
