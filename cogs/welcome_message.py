@@ -22,8 +22,7 @@ class WelcomeMessage(Cog):
             message_start=f"""{member.mention} a rejoint le serveur. Un message de bienvenue va lui être envoyé.""",
             message_success=f"""Un message de bienvenue a été envoyé à {member.mention}.""",
             message_failure=f"""Echec de l'envoi du message de bienvenue à {member.mention}.""",
-            task_info='task.private.welcome',
-            interaction=interaction
+            task_info='task.private.welcome'
         )
         await logger.log_start()
         text: str = read_text("config/welcome_message.txt")
