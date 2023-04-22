@@ -30,7 +30,7 @@ class WelcomeMessage(Cog):
         text = text.replace('${member}', member.mention)
         for channel_name, channel_id in self.__channel_dictionary.items():
             channel = self.__bot.get_channel(channel_id[secrets.working_environment])
-            text = text.replace(f"{{{channel_name}}}", channel.mention)
+            text = text.replace(f"${{{channel_name}}}", channel.mention)
 
         text_split: list[str] = MessageSplitter(text).get_message_split()
 
