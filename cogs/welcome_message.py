@@ -1,4 +1,4 @@
-from disnake import Member
+from disnake import AllowedMentions, Member
 from disnake.ext.commands import Cog, InteractionBot, slash_command
 from tools.archivist.logger import Logger
 from tools.message_splitter import MessageSplitter
@@ -9,7 +9,7 @@ class WelcomeMessage(Cog):
     def __init__(self, bot: InteractionBot):
         self.__bot: InteractionBot = bot
 
-    @commands.Cog.listener()
+    @Cog.listener()
     async def on_member_join(self, member: Member):
         """
         Envoie un message de bienvenue aux nouveaux membres rejoignant le serveur.
@@ -24,10 +24,12 @@ class WelcomeMessage(Cog):
         )
         await logger.log_start()
         text: str = read_text("config/welcome_message.txt")
+        text = text.replace('${member}', member.mention)
+
         text_split: list[str] = MessageSplitter(text).get_message_split()
 
         for message in text_split:
-            await member.send(message)
+            await member.send(message, suppress_embeds=True, allowed_mentions=AllowedMentions(users=False))
 
         await logger.log_success()
         return
