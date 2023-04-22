@@ -11,14 +11,11 @@ class WelcomeMessage(Cog):
         self.__bot: InteractionBot = bot
         self.__channel_dictionary = read_yaml('config/variables/channels.yml')
 
-    # @Cog.listener()
-    # async def on_member_join(self, member: Member):
-    @slash_command()
-    async def welcome(self, interaction):
+    @Cog.listener()
+    async def on_member_join(self, member: Member):
         """
         Envoie un message de bienvenue aux nouveaux membres rejoignant le serveur.
         """
-        member = interaction.author
         logger: Logger = Logger(
             self.__bot,
             log_group='Tâche',
