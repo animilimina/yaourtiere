@@ -11,12 +11,9 @@ class TestClass(commands.Cog):
         """
         Une description en docstring pour ma fonction.
         """
-        message_start = await interaction.channel.fetch_message(1082701463115022377)
-        async for message in interaction.channel.history(limit=10, after=message_start):
-            text = "\n".join([attachment.url for attachment in message.attachments])
-            print(text)
-            if text:
-                await interaction.channel.send(text)
+        # message_start = await interaction.channel.fetch_message(1082701463115022377)
+        channel = self.__bot.get_channel(1017524976359833691)
+        await interaction.author.send(channel.mention)
         await interaction.response.send_message("success")
 
     @commands.Cog.listener()
