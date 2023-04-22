@@ -1,6 +1,6 @@
 from config.variables import secrets
 from disnake import AllowedMentions, Member
-from disnake.ext.commands import Cog, InteractionBot, slash_command
+from disnake.ext.commands import Cog, InteractionBot
 from tools.archivist.logger import Logger
 from tools.message_splitter import MessageSplitter
 from tools.text_managers import read_text, read_yaml
