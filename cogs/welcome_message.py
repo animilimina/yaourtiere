@@ -9,15 +9,11 @@ class WelcomeMessage(Cog):
     def __init__(self, bot: InteractionBot):
         self.__bot: InteractionBot = bot
 
-    # @commands.Cog.listener()
-    # async def on_member_join(self, member: Member):
-    @slash_command()
-    async def welcome(self, interaction):
+    @commands.Cog.listener()
+    async def on_member_join(self, member: Member):
         """
         Envoie un message de bienvenue aux nouveaux membres rejoignant le serveur.
         """
-
-        member: Member = interaction.author
         logger: Logger = Logger(
             self.__bot,
             log_group='Tâche',
@@ -25,7 +21,6 @@ class WelcomeMessage(Cog):
             message_success=f"""Un message de bienvenue a été envoyé à {member.mention}.""",
             message_failure=f"""Echec de l'envoi du message de bienvenue à {member.mention}.""",
             task_info='task.private.welcome',
-            interaction=interaction
         )
         await logger.log_start()
         text: str = read_text("config/welcome_message.txt")
