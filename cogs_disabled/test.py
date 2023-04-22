@@ -1,4 +1,4 @@
-from disnake import Embed, Permissions
+from disnake import Embed, Permissions, ApplicationCommandInteraction, Message
 from disnake.ext import commands
 
 
@@ -22,6 +22,15 @@ class TestClass(commands.Cog):
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         print(reaction.emoji)
+
+    @commands.message_command(name="Modérer")
+    async def reverse(self, inter: ApplicationCommandInteraction, message: Message):
+        # Reversing the message and sending it back.
+        await inter.response.defer()
+        # await message.clean_content
+        # await message.channel.send
+        await inter.edit_original_message(f"""
+        **__MESSAGE MODÉRÉ__**\nAuteur: {message.author.mention}. Date: {message.created_at}\n||~~{message.content}~~||""")
 
 
 def setup(bot):

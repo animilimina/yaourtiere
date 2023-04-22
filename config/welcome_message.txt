@@ -1,0 +1,7 @@
+Salut toi !
+
+Bienvenue chez toi. Tu vas voir c'est chouette ici...
+
+On se met du texte en **gras**, en *italique*, en __souligné__, en ~~barré~~, en ||caché||.
+
+Et on regarde ce que ça donne, je suis curieux.
