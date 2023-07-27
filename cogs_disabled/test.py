@@ -1,4 +1,4 @@
-from disnake import Embed, Permissions
+from disnake import Embed, Permissions, ApplicationCommandInteraction, Message
 from disnake.ext import commands
 
 
@@ -7,23 +7,27 @@ class TestClass(commands.Cog):
         self.__bot = bot
 
     @commands.slash_command()
-    async def test_embed(self, interaction):
+    async def test(self, interaction):
         """
         Une description en docstring pour ma fonction.
         """
+        # message_start = await interaction.channel.fetch_message(1082701463115022377)
+        channel = self.__bot.get_channel(1017524976359833691)
+        await interaction.author.send(channel.mention)
+        await interaction.response.send_message("success")
 
-        embed = Embed(
-            title="Un titre pour mon embed",
-            description="Un body pour mon embed",
-            colour=0xF0C43F
-        )
-        embed.set_author(name='sticky')
-        # print(interaction.channel.id)
-        await interaction.response.send_message('', embed=embed)
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction, user):
+        print(reaction.emoji)
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def test_droits(self, inter):
-        await inter.response.send_message('coucou')
+    @commands.message_command(name="Modérer")
+    async def reverse(self, inter: ApplicationCommandInteraction, message: Message):
+        # Reversing the message and sending it back.
+        await inter.response.defer()
+        # await message.clean_content
+        # await message.channel.send
+        await inter.edit_original_message(f"""
+        **__MESSAGE MODÉRÉ__**\nAuteur: {message.author.mention}. Date: {message.created_at}\n||~~{message.content}~~||""")
 
 
 def setup(bot):

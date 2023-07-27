@@ -8,3 +8,4 @@ pyenv.cfg
 ../../yaourtiere/.env
 /notebooks/
 /config/sticky_message/*
+/config/test_collector/*
