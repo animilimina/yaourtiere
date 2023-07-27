@@ -13,7 +13,7 @@ class ServerTools(commands.Cog):
     @commands.slash_command()
     async def count_members(self, inter):
         """
-        Fait rouler Dédé.
+        Compte les membres inscrits sur le serveur.
         """
         logger = Logger(
             self.__bot,
