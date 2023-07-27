@@ -1,5 +1,5 @@
 from config.variables import constants
-from disnake import AllowedMentions, Embed, Permissions
+from disnake import AllowedMentions, Embed, Guild, Permissions
 from disnake.abc import GuildChannel
 from disnake.ext import commands
 from tools.archivist.logger import Logger
@@ -9,7 +9,7 @@ import os
 
 class StickyMessage(commands.Cog):
     def __init__(self, bot):
-        self.__bot = bot
+        self.__bot: Guild = bot
         self.__guild = self.__bot.guilds[0]
         self.__settings_directory = constants.DIRECTORY_STICKY_MESSAGES
         self.__create_settings_directory()
