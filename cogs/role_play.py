@@ -36,9 +36,9 @@ class RolePlay(commands.Cog):
             await logger.log_failure()
             return
 
-        text = f"{inter.author.mention} a lancé {lancers} dés à {faces} faces:"
+        text = f"🎲 {inter.author.mention} a lancé {lancers} dés à {faces} faces:"
         for i in range(lancers):
-            text += f"\nLancer n°{i + 1} >> Résultat: **{randrange(1, faces + 1)}**"
+            text += f"\n#{i + 1} >> **{randrange(1, faces + 1)}**"
         text_split: list[str] = MessageSplitter(text).get_message_split()
         for message in text_split:
             await inter.channel.send(message, suppress_embeds=True,
