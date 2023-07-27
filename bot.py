@@ -16,6 +16,7 @@ class Yaourtiere(InteractionBot):
     def __set_intents():
         intents = disnake.Intents.default()
         intents.members = True
+        intents.presences = True
         return intents
 
     def run_bot(self):
