@@ -35,10 +35,10 @@ class ServerTools(commands.Cog):
         presence_count: int = guild.approximate_presence_count - bot_count
         presence_string: str = 'personne' + ('s' if presence_count > 1 else '')
 
-        message: str = f"__Membres de {self.__guild.name}__"
+        message: str = f"__Membres de **{self.__guild.name}**__"
         message += f"\n👤 {member_count} {member_string}"
         message += f"\n🤖 {bot_count} {bot_string}"
-        message += f"\n\n🔌 {presence_count} {presence_string} actuellement en ligne."
+        message += f"\n\n🔌 {presence_count} {presence_string} en ligne"
 
         await inter.channel.send(message, suppress_embeds=True, allowed_mentions=AllowedMentions(users=False))
 
