@@ -1,4 +1,4 @@
-from disnake import AllowedMentions
+from disnake import AllowedMentions, Guild
 from disnake.ext import commands
 from random import randrange
 from tools.archivist.logger import Logger
@@ -8,7 +8,7 @@ from tools.message_splitter import MessageSplitter
 class RolePlay(commands.Cog):
     def __init__(self, bot):
         self.__bot = bot
-        self.__guild = self.__bot.guilds[0]
+        self.__guild: Guild = self.__bot.guilds[0]
 
     @commands.slash_command()
     async def dice(self, inter, lancers: int, faces: int):
