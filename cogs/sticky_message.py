@@ -1,8 +1,9 @@
 from config.variables import constants
-from disnake import AllowedMentions, Embed, Guild, Permissions
+from disnake import AllowedMentions, ApplicationCommandInteraction, Embed, Guild, Permissions
 from disnake.abc import GuildChannel
 from disnake.ext import commands
 from tools.archivist.logger import Logger
+from tools.directory_managers import create_directory
 from tools.text_managers import read_yaml, write_yaml
 import os
 
@@ -12,18 +13,8 @@ class StickyMessage(commands.Cog):
         self.__bot: Guild = bot
         self.__guild = self.__bot.guilds[0]
         self.__settings_directory = constants.DIRECTORY_STICKY_MESSAGES
-        self.__create_settings_directory()
+        create_directory(self.__settings_directory)
         self.__settings = self.__read_settings()
-
-    def __create_settings_directory(self) -> None:
-        directory_split = self.__settings_directory.split('/')
-        current_layer = []
-        for layer in directory_split:
-            current_layer.append(layer)
-            try:
-                os.mkdir('/'.join(current_layer))
-            except:
-                pass
 
     def __read_settings(self) -> list:
         output = []
@@ -85,7 +76,8 @@ class StickyMessage(commands.Cog):
         return embed
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_create(self, inter, name: str, message_id: str, title: str = '', channel: GuildChannel = None):
+    async def sticky_create(self, inter: ApplicationCommandInteraction, name: str, message_id: str, title: str = '',
+                            channel: GuildChannel = None):
         """
         Crée un sticky à partir d'un message de ce canal.
         """
@@ -136,7 +128,7 @@ class StickyMessage(commands.Cog):
         return
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_edit(self, inter, name: str, message_id: str, title: str = ''):
+    async def sticky_edit(self, inter: ApplicationCommandInteraction, name: str, message_id: str, title: str = ''):
         """
         Modifie un sticky.
         """
@@ -178,7 +170,7 @@ class StickyMessage(commands.Cog):
         return
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_channel_add(self, inter, name: str, channel: GuildChannel):
+    async def sticky_channel_add(self, inter: ApplicationCommandInteraction, name: str, channel: GuildChannel):
         """
         Associe un canal à un sticky.
         """
@@ -217,7 +209,7 @@ class StickyMessage(commands.Cog):
         return
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_channel_remove(self, inter, channel: GuildChannel):
+    async def sticky_channel_remove(self, inter: ApplicationCommandInteraction, channel: GuildChannel):
         """
         Retire un canal du sticky auquel il est associé.
         """
@@ -248,7 +240,7 @@ class StickyMessage(commands.Cog):
         return
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_list(self, inter):
+    async def sticky_list(self, inter: ApplicationCommandInteraction):
         """
         Liste tous les sticky existants et les canaux associés.
         """
@@ -283,7 +275,7 @@ class StickyMessage(commands.Cog):
         return
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_check(self, inter, name):
+    async def sticky_check(self, inter: ApplicationCommandInteraction, name: str):
         """
         Affiche un sticky et les canaux associés.
         """
@@ -322,9 +314,16 @@ class StickyMessage(commands.Cog):
         return
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_delete(self, inter, name):
+    async def sticky_delete(self, inter: ApplicationCommandInteraction, name: str, confirmation: str = None):
         """
-        Supprime un sticky.
+        ⚠️⚠️⚠️️ ACTION IRRÉVERSIBLE ⚠️⚠️⚠️ Supprime un sticky.
+
+        Parameters
+        ----------
+        name: :class: str
+            Le nom du sticky à supprimer.
+        confirmation: class: str
+            Pour valider la suppression, taper "SUPPRIMER LE STICKY".
         """
         logger = Logger(
             self.__bot,
@@ -336,6 +335,11 @@ class StickyMessage(commands.Cog):
             interaction=inter
         )
         await logger.log_start()
+
+        if not confirmation == "SUPPRIMER LE STICKY":
+            await logger.log_message(f"""La confirmation de la suppression du sticky "{name}" n'a pas été correctement saisie.""")
+            await logger.log_failure()
+            return
 
         file_name = name + '.yml'
         file_path = self.__settings_directory + file_name
@@ -350,6 +354,15 @@ class StickyMessage(commands.Cog):
 
         await logger.log_success()
         return
+
+    @sticky_edit.autocomplete("name")
+    @sticky_check.autocomplete("name")
+    @sticky_channel_add.autocomplete("name")
+    @sticky_check.autocomplete("name")
+    @sticky_delete.autocomplete("name")
+    async def autocomplete_sticky_name(self, interaction: ApplicationCommandInteraction, user_input: str):
+        string = user_input.lower()
+        return [x["name"] for x in self.__settings if string in x["name"]]
 
 
 def setup(bot):

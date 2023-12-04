@@ -1,5 +1,6 @@
 from disnake import Embed, Permissions, ApplicationCommandInteraction, Message
 from disnake.ext import commands
+from disnake.ui import Button, View
 
 
 class TestClass(commands.Cog):
@@ -7,27 +8,29 @@ class TestClass(commands.Cog):
         self.__bot = bot
 
     @commands.slash_command()
-    async def test(self, interaction):
-        """
-        Une description en docstring pour ma fonction.
-        """
-        # message_start = await interaction.channel.fetch_message(1082701463115022377)
-        channel = self.__bot.get_channel(1017524976359833691)
-        await interaction.author.send(channel.mention)
-        await interaction.response.send_message("success")
+    async def show(self, inter):
+        await inter.channel.send('bla')
+        return
 
-    @commands.Cog.listener()
-    async def on_reaction_add(self, reaction, user):
-        print(reaction.emoji)
+    @show.sub_command()
+    async def text(self, inter, input: str):
+        await inter.response.send_message(input)
+        return
 
-    @commands.message_command(name="Modérer")
-    async def reverse(self, inter: ApplicationCommandInteraction, message: Message):
-        # Reversing the message and sending it back.
+    @show.sub_command()
+    async def number(self, inter, input: str):
+        await inter.channel.send(input)
+        await inter.response.send_message('done')
+        return
+
+    @commands.slash_command()
+    async def bouton(self, inter, input: str):
         await inter.response.defer()
-        # await message.clean_content
-        # await message.channel.send
-        await inter.edit_original_message(f"""
-        **__MESSAGE MODÉRÉ__**\nAuteur: {message.author.mention}. Date: {message.created_at}\n||~~{message.content}~~||""")
+        view = View()
+        button = Button(label=input, url=inter.channel.jump_url)
+        view.add_item(button)
+        await inter.channel.send("voici le bouton", view=view)
+        await inter.response.send_message("done")
 
 
 def setup(bot):
