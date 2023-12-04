@@ -8,7 +8,7 @@ from disnake.abc import GuildChannel
 from disnake.ext import commands
 from disnake.ui import Button, View
 from services.dynamodb import DynamodbItem
-from timpe import sleep
+from time import sleep
 from tools.archivist.logger import Logger
 from tools.directory_managers import create_directory
 from tools.text_managers import read_yaml, write_yaml
