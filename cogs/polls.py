@@ -894,7 +894,7 @@ class VoteHandler(DynamodbItem):
 class ModalBuilder(disnake.ui.Modal):
     def __init__(self, bot, campaign_name: str, question: dict, poll_range: list, user_id: int):
         self.__bot = bot
-        self.__poll_title = question["title"]
+        self.__poll_title = question["title"][:45]
         self.__poll_id = question["id"]
         self.__poll_range_start = poll_range[0]
         self.__poll_range_end = poll_range[1] + 1
