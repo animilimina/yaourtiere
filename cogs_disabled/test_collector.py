@@ -4,6 +4,7 @@ from disnake import AllowedMentions, Embed, Permissions
 from disnake.abc import GuildChannel
 from disnake.ext import commands, tasks
 from tools.archivist.logger import Logger
+from tools.directory_managers import create_directory
 from tools.text_managers import read_yaml, write_yaml
 import os
 
@@ -13,18 +14,8 @@ class TestCollector(commands.Cog):
         self.__bot = bot
         self.__guild = self.__bot.guilds[0]
         self.__settings_directory = constants.DIRECTORY_TEST_COLLECTOR
-        self.__create_settings_directory()
+        create_directory(self.__settings_directory)
         self.__settings = self.__read_settings()
-
-    def __create_settings_directory(self) -> None:
-        directory_split = self.__settings_directory.split('/')
-        current_layer = []
-        for layer in directory_split:
-            current_layer.append(layer)
-            try:
-                os.mkdir('/'.join(current_layer))
-            except:
-                pass
 
     def __read_settings(self) -> list:
         output = []
