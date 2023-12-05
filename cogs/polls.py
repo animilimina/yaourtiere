@@ -450,7 +450,7 @@ class Poll(commands.Cog):
                 channel_item = await self.__guild.fetch_channel(channel)
                 channel_id = channel_item.id
             except:
-                pass
+                channel_id = None
         else:
             channel_id = None
 
