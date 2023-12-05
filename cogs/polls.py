@@ -230,7 +230,7 @@ class Poll(commands.Cog):
 
         text = "__**Liste des campagnes de sondage**__"
         for settings in self.__settings:
-            text += f"""\n{settings["name"]}"""
+            text += f"""\n{'🟢' if settings["active"] else '🔴'} {settings["name"]}"""
             try:
                 channel = await self.__guild.fetch_channel(settings["channel_id"])
                 text += f" {channel.mention}"
@@ -279,6 +279,9 @@ class Poll(commands.Cog):
                 text += f"{channel.mention}"
             except:
                 pass
+
+        if settings["newcomers"]:
+            text += "\n**Message privé** envoyé automatiquement aux nouveaux membres du serveur."
 
         embeds = []
 
@@ -423,6 +426,12 @@ class Poll(commands.Cog):
             return
 
         poll_campaign_settings = [x for x in self.__settings if x["name"] == campaign][0]
+        if poll_campaign_settings["active"]:
+            await logger.log_message(f"""La campagne de sondage "{campaign}" est active, impossible de modifier.""")
+            await logger.log_failure()
+            return
+
+
         if len([x for x in poll_campaign_settings["questions"] if x["id"] == id]) > 0:
             await logger.log_message(f"""Une question "{id}" existe déjà dans la campagne "{campaign}".""")
             await logger.log_failure()
@@ -499,6 +508,10 @@ class Poll(commands.Cog):
             return
 
         poll_campaign_settings = [x for x in self.__settings if x["name"] == campaign][0]
+        if poll_campaign_settings["active"]:
+            await logger.log_message(f"""La campagne de sondage "{campaign}" est active, impossible de modifier.""")
+            await logger.log_failure()
+            return
 
         if len([x for x in poll_campaign_settings["questions"] if x["id"] == id]) == 0:
             await logger.log_message(f"""La question "{id}" n'existe pas dans la campagne "{campaign}".""")
@@ -692,7 +705,7 @@ class Poll(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        for campaign in [x for x in self.__settings if x["newcomers"]]:
+        for campaign in [x for x in self.__settings if x["newcomers"] and x["active"]]:
             sleep(2)
             private_message = PrivateMessage(self.__bot, campaign_settings=campaign)
             await private_message.send_private_message_to_newcomer(member)
@@ -786,6 +799,12 @@ class PrivateMessage(commands.Cog):
             interaction=interaction
         )
         await logger.log_start()
+
+        if not self.__campaign["active"]:
+            await logger.log_message(f"""La campagne de sondage **{self.__campaign["name"]}** est close.""")
+            await logger.log_failure()
+            return
+
         await self.__populate_view()
         if user.bot:
             await logger.log_message(f"""{user.mention} est identifié comme un bot.""")
@@ -812,20 +831,33 @@ class PrivateMessage(commands.Cog):
         return
 
     async def show_poll_modal(self, interaction: MessageInteraction, custom_id_split):
-        logger = Logger(
-            self.__bot,
-            log_group='Bouton',
-            task_info='button.poll.modal',
-            interaction=interaction
-        )
         poll_id = custom_id_split[3]
         poll_range = [int(i) for i in custom_id_split[4:]]
         user_id = interaction.author.id
         poll = [top for top in self.__campaign["questions"] if top["id"] == poll_id][0]
-        await logger.log_message(f"**Campagne de sondage {self.__campaign['name']}** : un membre affiche le formulaire *{poll['title']}*.")
+
+        logger = Logger(
+            self.__bot,
+            log_group='Bouton',
+            message_start=f"**Campagne de sondage {self.__campaign['name']}** : un membre a demandé l'affichage du formulaire *{poll['title']}*.",
+            message_success=f"**Campagne de sondage {self.__campaign['name']}** : un membre affiche le formulaire *{poll['title']}*.",
+            message_failure=f"**Campagne de sondage {self.__campaign['name']}** : un membre n'affiche finalement pas le formulaire *{poll['title']}*.",
+            task_info='button.poll.modal',
+        )
+        await logger.log_start()
+
+        if not self.__campaign["active"]:
+            await logger.log_message(f"""La campagne de sondage **{self.__campaign["name"]}** est close.""")
+            await interaction.response.send_message("❌ Cette campagne de sondage est close")
+            await interaction.delete_original_message(delay=5)
+            await logger.log_failure()
+            return
+
         await interaction.response.send_modal(
             modal=ModalBuilder(bot=self.__bot, campaign_name=self.__campaign["name"], question=poll,
                                poll_range=poll_range, user_id=user_id))
+
+        await logger.log_success()
 
     async def share_vote_with_community(self, interaction: MessageInteraction, custom_id_split):
         poll_id = custom_id_split[3]
