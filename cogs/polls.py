@@ -271,7 +271,7 @@ class Poll(commands.Cog):
 
         settings = [settings for settings in self.__settings if settings["name"] == name][0]
 
-        text = f"""__**Campagne de sondage "{name}"__**"""
+        text = f"""__**Campagne de sondage "{name}"**__"""
         if settings["channel_id"]:
             text += f"\nParamétré pour s'afficher sur "
             try:
