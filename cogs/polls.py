@@ -591,6 +591,8 @@ class Poll(commands.Cog):
         )
         view_private_message.add_item(button_private_message)
 
+        await campaign_channel.send(settings["public_message"], view=view_private_message)
+
         for question in settings["questions"]:
             if question["channel"]:
                 try:
@@ -606,8 +608,6 @@ class Poll(commands.Cog):
                 if question["description"]:
                     await question_thread.send(question["description"])
                 question["channel"] = question_thread.id
-
-        await campaign_channel.send(settings["public_message"], view=view_private_message)
 
         if send_private_message:
             private_message = PrivateMessage(bot=self.__bot, campaign_settings=settings)
