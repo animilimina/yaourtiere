@@ -47,12 +47,10 @@ class CogManager(commands.Cog):
         self.__logger = Logger(
             self.__bot,
             log_group='Commande ',
-            message_start=f'{inter.author.mention} a demandé le rechargement des cogs.',
-            message_success=f'Rechargement des cogs terminé.',
             interaction=inter,
             task_info='command.bot.reload cogs'
         )
-        await self.__logger.log_start()
+        await self.__logger.log_start(f'{inter.author.mention} a demandé le rechargement des cogs.')
 
         self.__unload_all_cogs()
         self.__refresh_cog_list()
@@ -60,7 +58,7 @@ class CogManager(commands.Cog):
         self.__classify_cogs_unloaded_reloaded_loaded()
         await self.__log_cogs_unloaded_reloaded_loaded()
 
-        await self.__logger.log_success()
+        await self.__logger.log_success(f'Rechargement des cogs terminé.')
 
     def __unload_all_cogs(self):
         self.__cogs_unloaded = []
@@ -99,18 +97,16 @@ class CogManager(commands.Cog):
         self.__logger = Logger(
             self.__bot,
             log_group='Commande ',
-            message_start=f'{inter.author.mention} a demandé le rechargement du cog manager.',
-            message_success=f'Rechargement du cog manager terminé.',
             interaction=inter,
             task_info='command.bot.reload cog manager'
         )
-        await self.__logger.log_start()
+        await self.__logger.log_start(f'{inter.author.mention} a demandé le rechargement du cog manager.')
 
         cog_manager = 'cogs.' + self.__this_cog
         self.__bot.unload_extension(cog_manager)
         self.__bot.load_extension(cog_manager)
 
-        await self.__logger.log_success()
+        await self.__logger.log_success(f'Rechargement du cog manager terminé.')
 
 
 def setup(bot):

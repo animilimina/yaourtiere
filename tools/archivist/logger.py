@@ -31,11 +31,12 @@ class Logger:
             text = text.replace(f"${{{variable}}}", self.__variables[variable])
         return text
 
-    async def log_start(self, show_emoji: bool = True):
+    async def log_start(self, message: str = None, show_emoji: bool = True):
         self.__track_activity()
         await self.__interactor.defer()
         emoji = self.set_emoji("▶️", show_emoji)
-        await self.__log(emoji, self.__message_start)
+        message = message if message is not None else self.__message_start
+        await self.__log(emoji, message)
 
     @staticmethod
     def set_emoji(emoji: str, show_emoji: bool):
@@ -61,14 +62,16 @@ class Logger:
         for sub_message in message_split:
             await self.__logger.log(sub_message)
 
-    async def log_success(self, show_emoji: bool = True):
+    async def log_success(self, message: str = None, show_emoji: bool = True):
         self.__track_activity()
         await self.__interactor.success()
         emoji = self.set_emoji("✅", show_emoji)
-        await self.__log(emoji, self.__message_success)
+        message = message if message is not None else self.__message_success
+        await self.__log(emoji, message)
 
-    async def log_failure(self, show_emoji: bool = True):
+    async def log_failure(self, message: str = None, show_emoji: bool = True):
         self.__track_activity()
         await self.__interactor.failure()
         emoji = self.set_emoji("❌", show_emoji)
+        message = message if message is not None else self.__message_failure
         await self.__log(emoji, self.__message_failure)

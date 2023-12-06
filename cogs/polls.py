@@ -321,7 +321,7 @@ class Poll(commands.Cog):
                                        allowed_mentions=AllowedMentions(everyone=False, users=False))
         embeds = embeds[10:]
         while embeds:
-            await interaction.channel.send("...", embeds=embeds[:10],
+            await interaction.channel.send(embeds=embeds[:10],
                                            allowed_mentions=AllowedMentions(everyone=False, users=False))
             embeds = embeds[10:]
         await logger.log_success()
