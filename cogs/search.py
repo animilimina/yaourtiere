@@ -20,7 +20,7 @@ class Search(commands.Cog):
 
     def __read_settings(self) -> None:
         for file in self.__get_file_list():
-            self.__settings[file[:4]] = read_yaml(self.__settings_directory + file)
+            self.__settings[file[:-4]] = read_yaml(self.__settings_directory + file)
 
     def __get_file_list(self) -> list:
         try:
@@ -77,23 +77,26 @@ class Search(commands.Cog):
         filtered_list = [x for x in all_threads if expression.lower() in x.name.lower()]
 
         if len(filtered_list) == 0:
-            message = f"""{user.mention} désolé, pas de résultat pour "**{expression}**". À vous de créer ce fil ;-)"""
+            message = f"""{user.mention} désolé, pas de résultat pour "**{expression}**". À toi de créer ce fil ;-)"""
             result = await result_channel.send(message)
             await logger.log_success(
                 f"La recherche de fil de {user.mention} n'a pas donné de résultat. {result.jump_url}")
+            temporary_message = await interaction.channel.send(f"Pas de résultat : {result.jump_url}")
         else:
-            message = f"""{user.mention} vous trouverez "**{expression}**" dans :"""
+            message = f"""{user.mention} tu trouveras "**{expression}**" dans :"""
             embed_text = '\n'.join([x.parent.name + ' > ' + x.jump_url for x in filtered_list])
             embed_text_splitter = MessageSplitter(embed_text)
             texts = embed_text_splitter.get_message_split()
 
-            result = await interaction.channel.send(message, embed=Embed(description=texts[0]))
+            result = await result_channel.send(message, embed=Embed(description=texts[0]))
             texts = texts[1:]
             while texts:
-                await interaction.channel.send(embed=Embed(description=texts[0]))
+                await result_channel.send(embed=Embed(description=texts[0]))
                 texts = texts[1:]
             await logger.log_success(f"La recherche de fil de {user.mention} a abouti. {result.jump_url}")
+            temporary_message = await interaction.channel.send(f"Tes résultats sont ici : {result.jump_url}")
 
+        await temporary_message.delete(delay=5)
         return
 
     def __check_settings_existence(self, name: str):
