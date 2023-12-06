@@ -609,15 +609,14 @@ class Poll(commands.Cog):
                     await question_thread.send(question["description"])
                 question["channel"] = question_thread.id
 
-        if send_private_message:
-            private_message = PrivateMessage(bot=self.__bot, campaign_settings=settings)
-            await private_message.send_private_message_to_all_members(logger)
-
         settings["active"] = True
         file_path = self.__settings_directory + file_name
         write_yaml(settings, file_path)
-
         self.__settings = self.__read_settings()
+
+        if send_private_message:
+            private_message = PrivateMessage(bot=self.__bot, campaign_settings=settings)
+            await private_message.send_private_message_to_all_members(logger)
 
         await logger.log_success()
         return
