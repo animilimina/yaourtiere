@@ -8,5 +8,6 @@ pyenv.cfg
 ../../yaourtiere/.env
 /notebooks/
 /config/poll/*
+/config/search/*
 /config/sticky_message/*
 /config/test_collector/*

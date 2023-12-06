@@ -34,19 +34,17 @@ class ActiveThreads(commands.Cog):
         logger = Logger(
             self.__bot,
             log_group='Tâche',
-            message_start=f'Mise à jour de {self.__channel_to_update.mention}.',
-            message_success=f'Mise à jour de {self.__channel_to_update.mention} terminée.',
             task_info='task.active threads.update'
         )
 
-        await logger.log_start()
+        await logger.log_start(f'Mise à jour de {self.__channel_to_update.mention}.')
 
         self.__initialize_run()
         await self.__collect_channels_and_threads()
         self.__build_message_list()
         await self.__update_active_threads_channel()
 
-        await logger.log_success()
+        await logger.log_success(f'Mise à jour de {self.__channel_to_update.mention} terminée.')
         return
 
     async def __collect_channels_and_threads(self) -> None:
