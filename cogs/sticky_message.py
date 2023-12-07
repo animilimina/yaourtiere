@@ -76,7 +76,11 @@ class StickyMessage(commands.Cog):
         return embed
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_create(self, inter: ApplicationCommandInteraction, name: str, message_id: str, title: str = '',
+    async def sticky(self, inter):
+        return
+
+    @sticky.sub_command()
+    async def create(self, inter: ApplicationCommandInteraction, name: str, message_id: str, title: str = '',
                             channel: GuildChannel = None):
         """
         Crée un sticky à partir d'un message de ce canal.
@@ -127,8 +131,8 @@ class StickyMessage(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_edit(self, inter: ApplicationCommandInteraction, name: str, message_id: str, title: str = ''):
+    @sticky.sub_command()
+    async def edit(self, inter: ApplicationCommandInteraction, name: str, message_id: str, title: str = ''):
         """
         Modifie un sticky.
         """
@@ -169,8 +173,12 @@ class StickyMessage(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_channel_add(self, inter: ApplicationCommandInteraction, name: str, channel: GuildChannel):
+    @sticky.sub_command_group()
+    async def channel(self, inter):
+        return
+
+    @channel.sub_command()
+    async def add(self, inter: ApplicationCommandInteraction, name: str, channel: GuildChannel):
         """
         Associe un canal à un sticky.
         """
@@ -208,8 +216,8 @@ class StickyMessage(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_channel_remove(self, inter: ApplicationCommandInteraction, channel: GuildChannel):
+    @channel.sub_command()
+    async def remove(self, inter: ApplicationCommandInteraction, channel: GuildChannel):
         """
         Retire un canal du sticky auquel il est associé.
         """
@@ -239,8 +247,8 @@ class StickyMessage(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_list(self, inter: ApplicationCommandInteraction):
+    @sticky.sub_command()
+    async def list(self, inter: ApplicationCommandInteraction):
         """
         Liste tous les sticky existants et les canaux associés.
         """
@@ -274,8 +282,8 @@ class StickyMessage(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_check(self, inter: ApplicationCommandInteraction, name: str):
+    @sticky.sub_command()
+    async def check(self, inter: ApplicationCommandInteraction, name: str):
         """
         Affiche un sticky et les canaux associés.
         """
@@ -313,8 +321,8 @@ class StickyMessage(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def sticky_delete(self, inter: ApplicationCommandInteraction, name: str, confirmation: str = None):
+    @sticky.sub_command()
+    async def delete(self, inter: ApplicationCommandInteraction, name: str, confirmation: str = None):
         """
         ⚠️⚠️⚠️️ ACTION IRRÉVERSIBLE ⚠️⚠️⚠️ Supprime un sticky.
 
@@ -355,11 +363,11 @@ class StickyMessage(commands.Cog):
         await logger.log_success()
         return
 
-    @sticky_edit.autocomplete("name")
-    @sticky_check.autocomplete("name")
-    @sticky_channel_add.autocomplete("name")
-    @sticky_check.autocomplete("name")
-    @sticky_delete.autocomplete("name")
+    @edit.autocomplete("name")
+    @check.autocomplete("name")
+    @add.autocomplete("name")
+    @check.autocomplete("name")
+    @delete.autocomplete("name")
     async def autocomplete_sticky_name(self, interaction: ApplicationCommandInteraction, user_input: str):
         string = user_input.lower()
         return [x["name"] for x in self.__settings if string in x["name"]]
