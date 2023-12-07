@@ -33,10 +33,13 @@ class WelcomeMessage(Cog):
 
         text_split: list[str] = MessageSplitter(text).get_message_split()
 
-        for message in text_split:
-            await member.send(message, suppress_embeds=True, allowed_mentions=AllowedMentions(users=False))
-
-        await logger.log_success()
+        try:
+            for message in text_split:
+                await member.send(message, suppress_embeds=True, allowed_mentions=AllowedMentions(users=False))
+            await logger.log_success()
+        except:
+            await logger.log_message(f"""Impossible d'envoyer un MP à {member.mention}""")
+            await logger.log_failure()
         return
 
 
