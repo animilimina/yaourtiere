@@ -712,6 +712,8 @@ class Poll(commands.Cog):
 
         poll_campaign_settings = [x for x in self.__settings if x["name"] == name][0]
         total_voters = len(extraction)
+        total_votes = 0
+        all_votes = []
 
         categories = {}
         for question in poll_campaign_settings["questions"]:
@@ -721,15 +723,21 @@ class Poll(commands.Cog):
         for question_id, value in categories.items():
             all_voters = [x[question_id] for x in extraction if question_id in x.keys()]
             value["voters"] = len(all_voters)
-            all_votes = []
+            question_votes = []
             for voter in all_voters:
                 for vote in voter["vote"]:
+                    if vote not in question_votes:
+                        question_votes.append(vote)
                     if vote not in all_votes:
                         all_votes.append(vote)
             value["votes"] = sum([len(x["vote"]) for x in all_voters])
-            value["values"] = len(all_votes)
+            total_votes += value["votes"]
+            value["values"] = len(question_votes)
 
-        text: str = f"""Campagne de sondage "**{name}**": \nParticipants: {total_voters}"""
+        text: str = f"""Campagne de sondage "**{name}**":
+        Participants: {total_voters}
+        Votes : {total_votes}
+        Réponses distinctes : {len(all_votes)}"""
         embeds = []
         for category in categories.values():
             embed_title = f"""__**{category["title"]}**__"""
