@@ -723,7 +723,7 @@ class Poll(commands.Cog):
             embed_title = f"""__**{category["title"]}**__"""
             embed_description = f"""Participants : {category["voters"]}"""
             embed_description += f"""\nVotes : {category["votes"]}"""
-            embed_description += f"""\nVotes distincts : {category["values"]}"""
+            embed_description += f"""\nRéponses distinctes : {category["values"]}"""
             embed = Embed(
                 title=embed_title,
                 description=embed_description
