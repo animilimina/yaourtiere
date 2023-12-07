@@ -1,4 +1,4 @@
-from disnake import Interaction
+from disnake import Interaction, Message
 from tools.archivist.components.interactor import Interactor
 from tools.archivist.components.reporter import Reporter
 from tools.archivist.components.tracker import Tracker
@@ -42,11 +42,11 @@ class Logger:
     def set_emoji(emoji: str, show_emoji: bool):
         return emoji if show_emoji else ''
 
-    async def __log(self, emoji: str, message: str):
+    async def __log(self, emoji: str, message: str) -> Message:
         text = emoji
         text += ' ' + self.__log_group + ' :' if self.__log_group else ''
         text += ' ' + message
-        await self.__logger.log(text)
+        return await self.__logger.log(text)
 
     def __track_activity(self):
         if not self.__activity_was_tracked:
@@ -64,14 +64,14 @@ class Logger:
 
     async def log_success(self, message: str = None, show_emoji: bool = True):
         self.__track_activity()
-        await self.__interactor.success()
         emoji = self.set_emoji("✅", show_emoji)
         message = message if message is not None else self.__message_success
-        await self.__log(emoji, message)
+        log_message = await self.__log(emoji, message)
+        await self.__interactor.success(log_message)
 
     async def log_failure(self, message: str = None, show_emoji: bool = True):
         self.__track_activity()
-        await self.__interactor.failure()
         emoji = self.set_emoji("❌", show_emoji)
         message = message if message is not None else self.__message_failure
-        await self.__log(emoji, self.__message_failure)
+        log_message = await self.__log(emoji, message)
+        await self.__interactor.failure(log_message)

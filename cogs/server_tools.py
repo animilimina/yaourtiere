@@ -11,7 +11,11 @@ class ServerTools(commands.Cog):
         self.__guild: Guild = self.__bot.guilds[0]
 
     @commands.slash_command()
-    async def count_members(self, inter):
+    async def count(self, inter):
+        pass
+
+    @count.sub_command()
+    async def members(self, inter):
         """
         Compte les membres inscrits sur le serveur.
         """

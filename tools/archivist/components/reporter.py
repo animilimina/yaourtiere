@@ -1,5 +1,5 @@
 from config.variables import secrets
-from disnake import AllowedMentions
+from disnake import AllowedMentions, Message
 
 
 class Reporter:
@@ -9,22 +9,22 @@ class Reporter:
     def __init__(self, bot):
         self.__channel = bot.get_channel(secrets.log_thread)
 
-    async def log(self, message) -> None:
+    async def log(self, message) -> Message:
         """
         Forwards a message to the __post method (that will send it to the log thread)
 
         :param message: Message to be sent to the log thread
         """
-        await self.__post(message)
+        return await self.__post(message)
 
-    async def __post(self, message):
+    async def __post(self, message) -> Message:
         """
         Sends a message to the log thread.
 
         :param message: Message to be posted.
         """
 
-        await self.__channel.send(content=message, allowed_mentions=AllowedMentions(everyone=False, users=False))
+        return await self.__channel.send(content=message, allowed_mentions=AllowedMentions(everyone=False, users=False))
 
     async def reject(self, user):
         """

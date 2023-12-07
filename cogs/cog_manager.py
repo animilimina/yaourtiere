@@ -40,7 +40,11 @@ class CogManager(commands.Cog):
             self.__cogs_loaded.append(self.__current_cog)
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def reload_all_cogs(self, inter):
+    async def reload(self, inter):
+        return
+
+    @reload.sub_command()
+    async def cogs(self, inter):
         """
         Recharge les cogs (sauf le manager).
         """
@@ -89,8 +93,8 @@ class CogManager(commands.Cog):
         else:
             await self.__logger.log_message(message)
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def reload_cog_manager(self, inter):
+    @reload.sub_command()
+    async def manager(self, inter):
         """
         Recharge le cog manager.
         """
