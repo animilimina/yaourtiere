@@ -1,6 +1,4 @@
-from disnake import AllowedMentions, Interaction
-from disnake import Interaction
-
+from disnake import AllowedMentions, Interaction, Message
 class Interactor:
     """
     Slash command management
@@ -35,14 +33,14 @@ class Interactor:
             await self.__interaction.edit_original_message(message, allowed_mentions=self.__allowed_mentions)
             await self.__interaction.delete_original_message(delay=self.__seconds_before_feedback_deletion)
 
-    async def success(self) -> None:
+    async def success(self, log: Message) -> None:
         """
         Send success message to the user
         """
-        await self.__send_feedback(f"✅ {self.__user}, ta commande a réussi.")
+        await self.__send_feedback(f"✅ {self.__user}, ta commande a réussi. Log : {log.jump_url}")
 
-    async def failure(self) -> None:
+    async def failure(self, log: Message) -> None:
         """
         Send a failure message to the user
         """
-        await self.__send_feedback(f"❌ {self.__user}, ta commande a échoué")
+        await self.__send_feedback(f"❌ {self.__user}, ta commande a échoué. Log : {log.jump_url}")
