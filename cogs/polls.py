@@ -738,7 +738,8 @@ class Poll(commands.Cog):
                                            allowed_mentions=AllowedMentions(everyone=False, users=False))
             embeds = embeds[10:]
 
-        await logger.log_success(f"""Les statistiques de la campagne de sondage "{name}" ont été affichées sur {message.jump_url}""")
+        await logger.log_success(
+            f"""Les statistiques de la campagne de sondage "{name}" ont été affichées sur {message.jump_url}""")
 
     @poll_campaign_edit.autocomplete("name")
     @poll_campaign_check.autocomplete("name")
@@ -794,9 +795,10 @@ class PrivateMessage(commands.Cog):
             try:
                 await self.__send_vote_options_to_member(member)
             except:
-                pass
+                await logger.log_message(
+                    f"""Campagne de sondage "**{self.__campaign["name"]}**" : Impossible d'envoyer un MP à {member.mention}""")
         await logger.log_message(
-            f"""Le message privé pour la campagne de sondage "{self.__campaign["name"]} a été envoyé à {self.__members_contacted} membres.""")
+            f"""Le message privé pour la campagne de sondage "{self.__campaign["name"]}" a été envoyé à {self.__members_contacted} membres.""")
         return
 
     async def __populate_view(self):
@@ -843,7 +845,6 @@ class PrivateMessage(commands.Cog):
 
     async def __send_vote_options_to_member(self, member):
         if not member.bot:
-            self.__members_contacted += 1
             embed = Embed(
                 title=self.__campaign["name"],
                 description=self.__campaign["private_message"].replace("${user}", member.mention),
@@ -851,6 +852,7 @@ class PrivateMessage(commands.Cog):
                 timestamp=datetime.now(timezone.utc)
             )
             await member.send(embed=embed, view=self.__view)
+            self.__members_contacted += 1
             return
         else:
             return
@@ -879,8 +881,15 @@ class PrivateMessage(commands.Cog):
             await logger.log_failure()
             return
 
-        await self.__send_vote_options_to_member(user)
-        await logger.log_success()
+        try:
+            await self.__send_vote_options_to_member(user)
+            await logger.log_success()
+        except:
+            await logger.log_message(f"""Impossible d'envoyer un MP à {user.mention}""")
+            await logger.log_failure()
+            message = await interaction.channel.send(
+                f"""{user.mention} impossible de t'envoyer le MP. Assure-toi que tes options de contact privé ne le bloquent pas.""")
+            await message.delete(delay=5)
         return
 
     async def send_private_message_to_newcomer(self, user):
@@ -894,8 +903,13 @@ class PrivateMessage(commands.Cog):
         await self.__populate_view()
         if user.bot:
             return
-        await self.__send_vote_options_to_member(user)
-        await logger.log_success()
+        try:
+            await self.__send_vote_options_to_member(user)
+            await logger.log_success(
+                f"""Le MP pour la campagne de sondage {self.__campaign["name"]} a été envoyé à {user.mention}.""")
+        except:
+            await logger.log_failure(
+                f"""Le MP pour la campagne de sondage {self.__campaign["name"]} n'a pas été envoyé à {user.mention}.""")
         return
 
     async def show_poll_modal(self, interaction: MessageInteraction, custom_id_split):
