@@ -43,22 +43,18 @@ class Poll(commands.Cog):
     async def poll(self, interaction: ApplicationCommandInteraction):
         pass
 
-    @poll.sub_command_group()
-    async def campaign(self, interaction: ApplicationCommandInteraction):
-        pass
-
-    @campaign.sub_command()
-    async def create(self, interaction: ApplicationCommandInteraction, name: str, channel: GuildChannel,
-                                   public_message_id: str, private_message_id: str, newcomers: bool = False):
+    @poll.sub_command()
+    async def create(self, interaction: ApplicationCommandInteraction, poll: str, channel: GuildChannel,
+                     public_message_id: str, private_message_id: str, newcomers: bool = False):
         """
-        Crée une campagne de sondage à partir de deux messages de ce canal. Un salon peut être spécifié
+        Crée un sondage à partir de deux messages de ce canal. Un salon doit être spécifié.
 
         Parameters
         ----------
-        name: :class: str
-            Le nom de la campagne à créer. Il doit être unique, et ne pas contenir d'underscore _
+        poll: :class: str
+            Le nom du sondage à créer. Il doit être unique, et ne pas contenir d'underscore _
         channel: :class: GuildChannel
-            Le salon principal sur lequel se déroulera la campagne.
+            Le salon principal sur lequel se déroulera le sondage.
         public_message_id: class: str
             L'ID du message qui sert de modèle au message public qui sera affiché sur le salon principal.
         private_message_id: class: str
@@ -70,22 +66,22 @@ class Poll(commands.Cog):
         logger = Logger(
             self.__bot,
             log_group='Commande',
-            message_start=f"""{interaction.author.mention} a demandé la création de la campagne de sondage "{name}".""",
-            message_success=f"""La campagne de sondage "{name}" a été créée.""",
-            message_failure=f"""La campagne de sondage "{name}" n'a pas été créée.""",
-            task_info='command.poll.campaign create',
+            message_start=f"""{interaction.author.mention} a demandé la création du sondage **{poll}**.""",
+            message_success=f"""Le sondage **{poll}** a été créé.""",
+            message_failure=f"""Le sondage **{poll}** n'a pas été créé.""",
+            task_info='command.poll.create',
             interaction=interaction
         )
         await logger.log_start()
 
-        if '_' in name:
-            await logger.log_message(f"""Un nom de campagne de sondage ne doit pas contenir d'underscore.""")
+        if '_' in poll:
+            await logger.log_message(f"""Un nom de sondage ne doit pas contenir d'underscore.""")
             await logger.log_failure()
             return
 
-        file_name = name + '.yml'
+        file_name = poll + '.yml'
         if file_name in self.__get_file_list():
-            await logger.log_message(f"""Une campagne de sondages "{name}" existe déjà.""")
+            await logger.log_message(f"""Un sondage **{poll}** existe déjà.""")
             await logger.log_failure()
             return
 
@@ -94,7 +90,7 @@ class Poll(commands.Cog):
             public_text = public_message.content
         except:
             await logger.log_message(
-                f"""Le message (public) dont l'id est {message_id} n'a pas été trouvé dans {interaction.channel.mention}""")
+                f"""Le message (public) dont l'id est {public_message_id} n'a pas été trouvé dans {interaction.channel.mention}""")
             await logger.log_failure()
             return
 
@@ -103,7 +99,7 @@ class Poll(commands.Cog):
             private_text = private_message.content
         except:
             await logger.log_message(
-                f"""Le message (privé) dont l'id est {message_id} n'a pas été trouvé dans {interaction.channel.mention}""")
+                f"""Le message (privé) dont l'id est {private_message_id} n'a pas été trouvé dans {interaction.channel.mention}""")
             await logger.log_failure()
             return
 
@@ -114,7 +110,7 @@ class Poll(commands.Cog):
             return
 
         campaign_settings = {
-            "name": name,
+            "name": poll,
             "active": False,
             "newcomers": newcomers,
             "channel_id": channel_id if channel_id else '',
@@ -130,19 +126,18 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @campaign.sub_command()
-    async def edit(self, interaction: ApplicationCommandInteraction, name: str,
-                                 channel: GuildChannel = None, public_message_id: str = None,
-                                 private_message_id: str = None, newcomers: bool = None):
+    @poll.sub_command()
+    async def edit(self, interaction: ApplicationCommandInteraction, poll: str, channel: GuildChannel = None,
+                   public_message_id: str = None, private_message_id: str = None, newcomers: bool = None):
         """
-        Modifie une campagne de sondage.
+        Modifie un sondage.
 
         Parameters
         ----------
-        name: :class: str
-            Le nom de la campagne à éditer.
+        poll: :class: str
+            Le sondage à éditer.
         channel: :class: GuildChannel
-            Le salon principal sur lequel se déroulera la campagne.
+            Le salon principal sur lequel se déroulera le sondage.
         public_message_id: class: str
             L'ID du message qui sert de modèle au message public qui sera affiché sur le salon principal.
         private_message_id: class: str
@@ -153,26 +148,26 @@ class Poll(commands.Cog):
         logger = Logger(
             self.__bot,
             log_group='Commande',
-            message_start=f"""{interaction.author.mention} a demandé la modification de la campagne de sondage "{name}".""",
-            message_success=f"""La campagne de sondage "{name}" a été modifié.""",
-            message_failure=f"""La campagne de sondage "{name}" n'a pas été modifié.""",
-            task_info='command.poll.campaign edit',
+            message_start=f"""{interaction.author.mention} a demandé la modification deu sondage **{poll}**.""",
+            message_success=f"""Le sondage **{poll}** a été modifié.""",
+            message_failure=f"""Le sondage **{poll}** n'a pas été modifié.""",
+            task_info='command.poll.edit',
             interaction=interaction
         )
         await logger.log_start()
 
-        file_name = name + '.yml'
+        file_name = poll + '.yml'
         if file_name not in self.__get_file_list():
-            await logger.log_message(f"""Aucune campagne de sondage nommée "{name}" n'a été trouvée.""")
+            await logger.log_message(f"""Aucun sondage nommé **{poll}** n'a été trouvé.""")
             await logger.log_failure()
             return
 
         if not channel and not public_message_id and not private_message_id and newcomers is None:
-            await logger.log_message(f"""Aucun changement fourni pour la campagne de sondage nommée "{name}".""")
+            await logger.log_message(f"""Aucun changement fourni pour le sondage **{poll}**.""")
             await logger.log_failure()
             return
 
-        poll_campaign_settings = [settings for settings in self.__settings if settings["name"] == name][0]
+        poll_campaign_settings = [settings for settings in self.__settings if settings["name"] == poll][0]
 
         if channel:
             channel_id = channel.id
@@ -189,7 +184,7 @@ class Poll(commands.Cog):
                 poll_campaign_settings["public_message"] = public_text
             except:
                 await logger.log_message(
-                    f"""Le message (public) dont l'id est {message_id} n'a pas été trouvé dans {interaction.channel.mention}""")
+                    f"""Le message (public) dont l'id est {public_message_id} n'a pas été trouvé dans {interaction.channel.mention}""")
                 await logger.log_failure()
                 return
 
@@ -200,7 +195,7 @@ class Poll(commands.Cog):
                 poll_campaign_settings["private_message"] = private_text
             except:
                 await logger.log_message(
-                    f"""Le message (privé) dont l'id est {message_id} n'a pas été trouvé dans {interaction.channel.mention}""")
+                    f"""Le message (privé) dont l'id est {private_message_id} n'a pas été trouvé dans {interaction.channel.mention}""")
                 await logger.log_failure()
                 return
 
@@ -215,28 +210,27 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @campaign.sub_command()
+    @poll.sub_command()
     async def list(self, interaction: ApplicationCommandInteraction):
         """
-        Liste toutes les campagnes de sondage existantes et les salons associés.
+        Liste tous les sondages existants et les salons associés.
         """
         logger = Logger(
             self.__bot,
             log_group='Commande',
-            message_start=f"""{interaction.author.mention} a demandé la liste des campagnes de sondage.""",
-            message_success=f"""La liste des campagnes de sondage a été affichée sur {interaction.channel.mention}.""",
-            message_failure=f"""La liste des campagnes de sondage n'a pas été affichée.""",
+            message_start=f"""{interaction.author.mention} a demandé la liste des sondages.""",
+            message_failure=f"""La liste des sondages n'a pas été affichée.""",
             task_info='command.poll.list',
             interaction=interaction
         )
         await logger.log_start()
 
         if not self.__settings:
-            await logger.log_message("Il n'existe aucune campagne de sondage pour l'instant.")
+            await logger.log_message("Il n'existe aucun sondage pour l'instant.")
             await logger.log_failure()
             return
 
-        text = "__**Liste des campagnes de sondage**__"
+        text = "__**Liste des sondages**__"
         for settings in self.__settings:
             text += f"""\n{'🟢' if settings["active"] else '🔴'} {settings["name"]}"""
             try:
@@ -244,42 +238,41 @@ class Poll(commands.Cog):
                 text += f" {channel.mention}"
             except:
                 pass
-        await interaction.channel.send(text)
+        message = await interaction.channel.send(text)
 
-        await logger.log_success()
+        await logger.log_success(f"""La liste des sondages a été affichée sur {message.jump_url}.""")
         return
 
-    @campaign.sub_command()
-    async def check(self, interaction: ApplicationCommandInteraction, name: str):
+    @poll.sub_command()
+    async def check(self, interaction: ApplicationCommandInteraction, poll: str):
         """
-        Affiche les informations d'une campagne de sondages.
+        Affiche les informations d'un sondage.
 
         Parameters
         ----------
-        name: :class: str
-            Le nom de la campagne à afficher.
+        poll: :class: str
+            Le sondage à afficher.
         """
 
         logger = Logger(
             self.__bot,
             log_group='Commande',
-            message_start=f"""{interaction.author.mention} a demandé l'affichage des informations de la campagne de sondage "{name}".""",
-            message_success=f"""Les infos sur la campagne de sondage "{name}" ont été affichées sur {interaction.channel.mention}.""",
-            message_failure=f"""Les infos sur la campagne de sondage "{name}" n'ont pas été affichées.""",
-            task_info='command.poll.campaign check',
+            message_start=f"""{interaction.author.mention} a demandé les informations sur le sondage **{poll}**.""",
+            message_failure=f"""Les informations du sondage **{poll}** n'ont pas été affichées.""",
+            task_info='command.poll.check',
             interaction=interaction
         )
         await logger.log_start()
 
-        file_name = name + '.yml'
+        file_name = poll + '.yml'
         if file_name not in self.__get_file_list():
-            await logger.log_message(f"""Aucune campagne de sondage nommée "{name}" n'a été trouvée.""")
+            await logger.log_message(f"""Aucun sondage nommé **{poll}** n'a été trouvé.""")
             await logger.log_failure()
             return
 
-        settings = [settings for settings in self.__settings if settings["name"] == name][0]
+        settings = [settings for settings in self.__settings if settings["name"] == poll][0]
 
-        text = f"""__**Campagne de sondage "{name}"**__"""
+        text = f"""__**Sondage **{poll}****__"""
         if settings["channel_id"]:
             text += f"\nParamétré pour s'afficher sur "
             try:
@@ -325,52 +318,52 @@ class Poll(commands.Cog):
             )
             embeds.append(embed_question)
 
-        await interaction.channel.send(text, embeds=embeds[:10],
-                                       allowed_mentions=AllowedMentions(everyone=False, users=False))
+        message = await interaction.channel.send(text, embeds=embeds[:10],
+                                                 allowed_mentions=AllowedMentions(everyone=False, users=False))
         embeds = embeds[10:]
         while embeds:
             await interaction.channel.send(embeds=embeds[:10],
                                            allowed_mentions=AllowedMentions(everyone=False, users=False))
             embeds = embeds[10:]
-        await logger.log_success()
+        await logger.log_success(f"""Les informations du sondage **{poll}** ont été affichées sur {message.jump_url}.""")
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def delete(self, interaction: ApplicationCommandInteraction, name: str,
-                                   confirmation: str = None):
+    @poll.sub_command()
+    async def delete(self, interaction: ApplicationCommandInteraction, poll: str,
+                     confirmation: str = None):
         """
-        ⚠️⚠️⚠️️ ACTION IRRÉVERSIBLE ⚠️⚠️⚠️ Supprime une campagne de sondage.
+        ⚠️⚠️⚠️️ ACTION IRRÉVERSIBLE ⚠️⚠️⚠️ Supprime un sondage.
 
         Parameters
         ----------
-        name: :class: str
-            Le nom de la campagne à supprimer.
+        poll: :class: str
+            Le sondage à supprimer.
         confirmation: class: str
-            Pour valider la suppression, taper "SUPPRIMER LA CAMPAGNE".
+            Pour valider la suppression, taper "SUPPRIMER LE SONDAGE".
         """
         logger = Logger(
             self.__bot,
             log_group='Commande',
-            message_start=f"""{interaction.author.mention} a demandé la suppresion de la campagne de sondage "{name}".""",
-            message_success=f"""La campagne de sondage "{name}" a été supprimée.""",
-            message_failure=f"""La campagne de sondage "{name}" n'a pas été supprimée.""",
-            task_info='command.poll.campaign delete',
+            message_start=f"""{interaction.author.mention} a demandé la suppression du sondage **{poll}**.""",
+            message_success=f"""Le sondage **{poll}** a été supprimé.""",
+            message_failure=f"""Le sondage **{poll}** n'a pas été supprimé.""",
+            task_info='command.poll.delete',
             interaction=interaction
         )
         await logger.log_start()
 
-        if not confirmation == "SUPPRIMER LA CAMPAGNE":
+        if not confirmation == "SUPPRIMER LE SONDAGE":
             await logger.log_message(
-                f"""La confirmation de la suppression de la campagne de sondage "{name}" n'a pas été correctement saisie.""")
+                f"""La confirmation de la suppression du sondage **{poll}** n'a pas été correctement saisie.""")
             await logger.log_failure()
             return
 
-        file_name = name + '.yml'
+        file_name = poll + '.yml'
         file_path = self.__settings_directory + file_name
         try:
             os.remove(file_path)
         except:
-            await logger.log_message(f"""Aucune campagne de sondage nommée "{name}" n'a été trouvée.""")
+            await logger.log_message(f"""Aucun sondage nommée **{poll}** n'a été trouvé.""")
             await logger.log_failure()
             return
 
@@ -384,19 +377,19 @@ class Poll(commands.Cog):
         pass
 
     @question.sub_command()
-    async def add(self, interaction: ApplicationCommandInteraction, campaign: str, id: str, title: str,
-                                options: int, label: str,
-                                channel: GuildChannel = None, description_message_id: str = '', emoji: str = None,
-                                long_input: bool = False, max_characters: int = 100, placeholder: str = None,
-                                ranking: bool = True):
+    async def add(self, interaction: ApplicationCommandInteraction, poll: str, question_id: str, title: str,
+                  options: int, label: str,
+                  channel: GuildChannel = None, description_message_id: str = '', emoji: str = None,
+                  long_input: bool = False, max_characters: int = 100, placeholder: str = None,
+                  ranking: bool = True):
         """
-        Ajoute une question à une campagne de sondage
+        Ajoute une question à un sondage
 
         Parameters
         ----------
-        campaign: :class: str
-            Le nom de la campagne à laquelle on veut ajouter la question.
-        id: class: str
+        poll: :class: str
+            Le nom du sondage auquel on veut ajouter la question.
+        question_id: class: str
             Un nom court (en un mot) pour identifier la question.
         title: class: str
             La question à afficher, elle figurera sur le bouton, et en titre de la fenêtre de réponse.
@@ -423,28 +416,28 @@ class Poll(commands.Cog):
         logger = Logger(
             self.__bot,
             log_group='Commande',
-            message_start=f"""{interaction.author.mention} a demandé l'ajout de la question "{id}" à la campagne "{campaign}".""",
-            message_success=f"""La question "{id}" a été ajoutée à la campagne "{campaign}".""",
-            message_failure=f"""La question "{id}" n'a pas été ajoutée à la campagne "{campaign}".""",
-            task_info='command.poll.question add',
+            message_start=f"""{interaction.author.mention} a demandé l'ajout de la question "{question_id}" au sondage **{poll}**.""",
+            message_success=f"""La question "{question_id}" a été ajoutée au sondage **{poll}**.""",
+            message_failure=f"""La question "{question_id}" n'a pas été ajoutée au sondage **{poll}**.""",
+            task_info='command.poll.add',
             interaction=interaction
         )
         await logger.log_start()
 
-        file_name = campaign + '.yml'
+        file_name = poll + '.yml'
         if file_name not in self.__get_file_list():
-            await logger.log_message(f"""Aucune campagne de sondage nommée "{campaign}" n'a été trouvée.""")
+            await logger.log_message(f"""Aucun sondage nommé **{poll}** n'a été trouvé.""")
             await logger.log_failure()
             return
 
-        poll_campaign_settings = [x for x in self.__settings if x["name"] == campaign][0]
+        poll_campaign_settings = [x for x in self.__settings if x["name"] == poll][0]
         if poll_campaign_settings["active"]:
-            await logger.log_message(f"""La campagne de sondage "{campaign}" est active, impossible de modifier.""")
+            await logger.log_message(f"""Le sondage **{poll}** est actif, impossible de modifier.""")
             await logger.log_failure()
             return
 
-        if len([x for x in poll_campaign_settings["questions"] if x["id"] == id]) > 0:
-            await logger.log_message(f"""Une question "{id}" existe déjà dans la campagne "{campaign}".""")
+        if len([x for x in poll_campaign_settings["questions"] if x["id"] == question_id]) > 0:
+            await logger.log_message(f"""Une question "{question_id}" existe déjà dans le sondage **{poll}**.""")
             await logger.log_failure()
             return
 
@@ -466,7 +459,7 @@ class Poll(commands.Cog):
             channel_id = None
 
         question = {
-            "id": id,
+            "id": question_id,
             "title": title,
             "channel": channel_id,
             "options": options,
@@ -489,47 +482,47 @@ class Poll(commands.Cog):
         return
 
     @question.sub_command()
-    async def remove(self, interaction: ApplicationCommandInteraction, campaign: str, id: str):
+    async def remove(self, interaction: ApplicationCommandInteraction, poll: str, question_id: str):
         """
-       Retire une question d'une campagne de sondage
+       Retire une question d'un sondage
 
        Parameters
        ----------
-       campaign: :class: str
-           Le nom de la campagne dont on veut retirer la question.
-       id: class: str
+       poll: :class: str
+           Le sondage dont on veut retirer la question.
+       question_id: class: str
            L'identifiant de la question à retirer.
         """
 
         logger = Logger(
             self.__bot,
             log_group='Commande',
-            message_start=f"""{interaction.author.mention} a demandé le retrait de la question "{id}" de la campagne "{campaign}".""",
-            message_success=f"""La question "{id}" a été retirée de la campagne "{campaign}".""",
-            message_failure=f"""La question "{id}" n'a pas été retirée de la campagne "{campaign}".""",
-            task_info='command.poll.question remove',
+            message_start=f"""{interaction.author.mention} a demandé le retrait de la question "{question_id}" du sondage **{poll}**.""",
+            message_success=f"""La question "{question_id}" a été retirée du sondage **{poll}**.""",
+            message_failure=f"""La question "{question_id}" n'a pas été retirée du sondage **{poll}**.""",
+            task_info='command.poll.remove',
             interaction=interaction
         )
         await logger.log_start()
 
-        file_name = campaign + '.yml'
+        file_name = poll + '.yml'
         if file_name not in self.__get_file_list():
-            await logger.log_message(f"""Aucune campagne de sondage nommée "{campaign}" n'a été trouvée.""")
+            await logger.log_message(f"""Aucun sondage nommée **{poll}** n'a été trouvé.""")
             await logger.log_failure()
             return
 
-        poll_campaign_settings = [x for x in self.__settings if x["name"] == campaign][0]
+        poll_campaign_settings = [x for x in self.__settings if x["name"] == poll][0]
         if poll_campaign_settings["active"]:
-            await logger.log_message(f"""La campagne de sondage "{campaign}" est active, impossible de modifier.""")
+            await logger.log_message(f"""Le sondage **{poll}** est actif, impossible de modifier.""")
             await logger.log_failure()
             return
 
-        if len([x for x in poll_campaign_settings["questions"] if x["id"] == id]) == 0:
-            await logger.log_message(f"""La question "{id}" n'existe pas dans la campagne "{campaign}".""")
+        if len([x for x in poll_campaign_settings["questions"] if x["id"] == question_id]) == 0:
+            await logger.log_message(f"""La question "{question_id}" n'existe pas dans le sondage **{poll}**.""")
             await logger.log_failure()
             return
 
-        question = [x for x in poll_campaign_settings["questions"] if x["id"] == id][0]
+        question = [x for x in poll_campaign_settings["questions"] if x["id"] == question_id][0]
         poll_campaign_settings["questions"].pop(poll_campaign_settings["questions"].index(question))
 
         file_path = self.__settings_directory + file_name
@@ -540,19 +533,19 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @campaign.sub_command()
-    async def start(self, interaction: ApplicationCommandInteraction, name: str,
-                                  confirmation: str = None, auto_setup: bool = False,
-                                  send_private_message: bool = False):
+    @poll.sub_command()
+    async def start(self, interaction: ApplicationCommandInteraction, poll: str,
+                    confirmation: str = None, auto_setup: bool = False,
+                    send_private_message: bool = False):
         """
-        Lance une campagne de sondage.
+        Lance un sondage.
 
         Parameters
         ----------
-        name: :class: str
-            Le nom de la campagne à débuter.
+        poll: :class: str
+            Le sondage à débuter.
         confirmation: class: str
-            Pour valider, taper "LANCER LA CAMPAGNE".
+            Pour valider, taper "LANCER LE SONDAGE".
         auto_setup: class: bool
             True : poster les messages sur les salons et fils. False : se limite à créer les fils manquants.
         send_private_message: class: bool
@@ -562,36 +555,36 @@ class Poll(commands.Cog):
         logger = Logger(
             self.__bot,
             log_group='Commande',
-            message_start=f"""{interaction.author.mention} a demandé le lancement de la campagne de sondage "{name}".""",
-            message_success=f"""La campagne de sondage "{name}" a été lancée.""",
-            message_failure=f"""La campagne de sondage "{name}" n'a pas été lancée.""",
-            task_info='command.poll.campaign start',
+            message_start=f"""{interaction.author.mention} a demandé le lancement du sondage **{poll}**.""",
+            message_success=f"""Le sondage **{poll}** a été lancé.""",
+            message_failure=f"""Le sondage **{poll}** n'a pas été lancé.""",
+            task_info='command.poll.start',
             interaction=interaction
         )
         await logger.log_start()
 
-        if not confirmation == "LANCER LA CAMPAGNE":
+        if not confirmation == "LANCER LE SONDAGE":
             await logger.log_message(
-                f"""La confirmation du lancement de la campagne de sondage "{name}" n'a pas été correctement saisie.""")
+                f"""La confirmation du lancement du sondage **{poll}** n'a pas été correctement saisie.""")
             await logger.log_failure()
             return
 
-        file_name = name + '.yml'
+        file_name = poll + '.yml'
         if file_name not in self.__get_file_list():
-            await logger.log_message(f"""La campagne de sondages "{name}" n'existe pas.""")
+            await logger.log_message(f"""Le sondage **{poll}** n'existe pas.""")
             await logger.log_failure()
             return
 
-        settings = [settings for settings in self.__settings if settings["name"] == name][0]
+        settings = [settings for settings in self.__settings if settings["name"] == poll][0]
         if settings["active"]:
-            await logger.log_message(f"""La campagne de sondage "{name}" est déja active.""")
+            await logger.log_message(f"""Le sondage **{poll}** est déjà actif.""")
             await logger.log_failure()
             return
 
         try:
             campaign_channel = await self.__guild.fetch_channel(settings["channel_id"])
         except:
-            await logger.log_message(f"""Le salon indiqué pour la campagne de sondage "{name}" n'existe pas.""")
+            await logger.log_message(f"""Le salon indiqué pour la campagne de sondage **{poll}** n'existe pas.""")
             await logger.log_failure()
             return
 
@@ -602,7 +595,7 @@ class Poll(commands.Cog):
         )
         view_private_message.add_item(button_private_message)
 
-        await campaign_channel.send(settings["public_message"], view=view_private_message)
+        message = await campaign_channel.send(settings["public_message"], view=view_private_message)
 
         for question in settings["questions"]:
             if question["channel"]:
@@ -624,6 +617,7 @@ class Poll(commands.Cog):
         file_path = self.__settings_directory + file_name
         write_yaml(settings, file_path)
         self.__settings = self.__read_settings()
+        await logger.log_message(f"""Le sondage **{poll}** est actif sur {message.jump_url}""")
 
         if send_private_message:
             private_message = PrivateMessage(bot=self.__bot, campaign_settings=settings)
@@ -632,49 +626,49 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @campaign.sub_command()
-    async def stop(self, interaction: ApplicationCommandInteraction, name: str, confirmation: str = None):
+    @poll.sub_command()
+    async def stop(self, interaction: ApplicationCommandInteraction, poll: str, confirmation: str = None):
         """
-        Met fin à une campagne de sondage.
+        Met fin à un sondage.
 
         Parameters
         ----------
-        name: :class: str
+        poll: :class: str
             Le nom de la campagne à interrompre.
         confirmation: class: str
-            Pour valider, taper "INTERROMPRE LA CAMPAGNE".
+            Pour valider, taper "INTERROMPRE LE SONDAGE".
         """
 
         logger = Logger(
             self.__bot,
             log_group='Commande',
-            message_start=f"""{interaction.author.mention} a demandé l'arrêt de la campagne de sondage "{name}".""",
-            message_success=f"""La campagne de sondage "{name}" a été arrêtée.""",
-            message_failure=f"""La campagne de sondage "{name}" n'a pas été arrêtée.""",
-            task_info='command.poll.campaign stop',
+            message_start=f"""{interaction.author.mention} a demandé l'arrêt du sondage **{poll}**.""",
+            message_success=f"""Le sondage **{poll}** a été arrêté.""",
+            message_failure=f"""Le sondage **{poll}** n'a pas été arrêté.""",
+            task_info='command.poll.stop',
             interaction=interaction
         )
         await logger.log_start()
 
-        if not confirmation == "INTERROMPRE LA CAMPAGNE":
+        if not confirmation == "INTERROMPRE LE SONDAGE":
             await logger.log_message(
-                f"""La confirmation de l'arrêt de la campagne de sondage "{name}" n'a pas été correctement saisie.""")
+                f"""La confirmation de l'arrêt du sondage **{poll}** n'a pas été correctement saisie.""")
             await logger.log_failure()
             return
 
-        file_name = name + '.yml'
+        file_name = poll + '.yml'
         if file_name not in self.__get_file_list():
-            await logger.log_message(f"""La campagne de sondages "{name}" n'existe pas.""")
+            await logger.log_message(f"""Le sondage **{poll}** n'existe pas.""")
             await logger.log_failure()
             return
 
         try:
             campaign_channel = await self.__guild.fetch_channel(settings["channel_id"])
-            await campaign_channel.send(f"""Fin de la campagne de sondage "{name}".""")
+            await campaign_channel.send(f"""Fin du sondage **{poll}**.""")
         except:
             pass
 
-        settings = [settings for settings in self.__settings if settings["name"] == name][0]
+        settings = [settings for settings in self.__settings if settings["name"] == poll][0]
         settings["active"] = False
         file_path = self.__settings_directory + file_name
         write_yaml(settings, file_path)
@@ -684,33 +678,33 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @campaign.sub_command()
-    async def statistics(self, interaction: ApplicationCommandInteraction, name: str):
+    @poll.sub_command()
+    async def statistics(self, interaction: ApplicationCommandInteraction, poll: str):
         """
         Affiche les statistiques d'une campagne de sondage.
 
         Parameters
         ----------
-        name: :class: str
+        poll: :class: str
             Le nom de la campagne.
         """
         logger = Logger(
             self.__bot,
             log_group='Commande',
-            message_start=f"""{interaction.author.mention} a demandé l'arrêt de la campagne de sondage "{name}".""",
-            message_success=f"""La campagne de sondage "{name}" a été arrêtée.""",
-            message_failure=f"""La campagne de sondage "{name}" n'a pas été arrêtée.""",
+            message_start=f"""{interaction.author.mention} a demandé l'arrêt de la campagne de sondage **{poll}**.""",
+            message_success=f"""La campagne de sondage **{poll}** a été arrêtée.""",
+            message_failure=f"""La campagne de sondage **{poll}** n'a pas été arrêtée.""",
             task_info='command.poll.campaign stop',
             interaction=interaction
         )
 
         await logger.log_start(
-            f"""{interaction.author.mention} a demandé l'affichage des statistiques de la campagne de sondage "{name}".""")
+            f"""{interaction.author.mention} a demandé l'affichage des statistiques de la campagne de sondage **{poll}**.""")
 
-        item_type = f"poll_{name}"
+        item_type = f"poll_{poll}"
         extraction = DynamodbExtractor(item_type).extraction
 
-        poll_campaign_settings = [x for x in self.__settings if x["name"] == name][0]
+        poll_campaign_settings = [x for x in self.__settings if x["name"] == poll][0]
         total_voters = len(extraction)
         total_votes = 0
         all_votes = []
@@ -734,7 +728,7 @@ class Poll(commands.Cog):
             total_votes += value["votes"]
             value["values"] = len(question_votes)
 
-        text: str = f"""Campagne de sondage "**{name}**":
+        text: str = f"""Campagne de sondage **{poll}**:
         Participants: {total_voters}
         Votes : {total_votes}
         Réponses distinctes : {len(all_votes)}"""
@@ -759,16 +753,16 @@ class Poll(commands.Cog):
             embeds = embeds[10:]
 
         await logger.log_success(
-            f"""Les statistiques de la campagne de sondage "{name}" ont été affichées sur {message.jump_url}""")
+            f"""Les statistiques de la campagne de sondage **{poll}** ont été affichées sur {message.jump_url}""")
 
-    @edit.autocomplete("name")
-    @check.autocomplete("name")
-    @delete.autocomplete("name")
-    @add.autocomplete("campaign")
-    @remove.autocomplete("campaign")
-    @start.autocomplete("name")
-    @stop.autocomplete("name")
-    @statistics.autocomplete("name")
+    @edit.autocomplete("poll")
+    @check.autocomplete("poll")
+    @delete.autocomplete("poll")
+    @add.autocomplete("poll")
+    @remove.autocomplete("poll")
+    @start.autocomplete("poll")
+    @stop.autocomplete("poll")
+    @statistics.autocomplete("poll")
     async def autocomplete_poll_campaign_name(self, inter: ApplicationCommandInteraction, user_input: str):
         string = user_input.lower()
         return [x["name"] for x in self.__settings if string in x["name"]]
