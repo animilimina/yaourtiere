@@ -272,7 +272,7 @@ class Poll(commands.Cog):
 
         settings = [settings for settings in self.__settings if settings["name"] == poll][0]
 
-        text = f"""__**Sondage **{poll}****__"""
+        text = f"""__Sondage **{poll}**__"""
         if settings["channel_id"]:
             text += f"\nParamétré pour s'afficher sur "
             try:
@@ -728,7 +728,7 @@ class Poll(commands.Cog):
             total_votes += value["votes"]
             value["values"] = len(question_votes)
 
-        text: str = f"""Campagne de sondage **{poll}**:
+        text: str = f"""Sondage **{poll}**:
         Participants: {total_voters}
         Votes : {total_votes}
         Réponses distinctes : {len(all_votes)}"""
@@ -810,7 +810,7 @@ class PrivateMessage(commands.Cog):
                 await self.__send_vote_options_to_member(member)
             except:
                 await logger.log_message(
-                    f"""Campagne de sondage "**{self.__campaign["name"]}**" : Impossible d'envoyer un MP à {member.mention}""")
+                    f"""Sondage "**{self.__campaign["name"]}**" : Impossible d'envoyer un MP à {member.mention}""")
         await logger.log_message(
             f"""Le message privé pour la campagne de sondage "{self.__campaign["name"]}" a été envoyé à {self.__members_contacted} membres.""")
         return
@@ -935,9 +935,9 @@ class PrivateMessage(commands.Cog):
         logger = Logger(
             self.__bot,
             log_group='Bouton',
-            message_start=f"**Campagne de sondage {self.__campaign['name']}** : un membre a demandé l'affichage du formulaire *{poll['title']}*.",
-            message_success=f"**Campagne de sondage {self.__campaign['name']}** : un membre affiche le formulaire *{poll['title']}*.",
-            message_failure=f"**Campagne de sondage {self.__campaign['name']}** : un membre n'affiche finalement pas le formulaire *{poll['title']}*.",
+            message_start=f"Sondage **{self.__campaign['name']}** : un membre a demandé l'affichage du formulaire *{poll['title']}*.",
+            message_success=f"Sondage **{self.__campaign['name']}** : un membre affiche le formulaire *{poll['title']}*.",
+            message_failure=f"Sondage **{self.__campaign['name']}** : un membre n'affiche finalement pas le formulaire *{poll['title']}*.",
             task_info='button.poll.modal',
         )
         await logger.log_start()
@@ -962,8 +962,8 @@ class PrivateMessage(commands.Cog):
         logger = Logger(
             self.__bot,
             log_group='Bouton',
-            message_start=f"""**Campagne de sondage {self.__campaign["name"]}** : {interaction.author.mention} souhaite partager son vote sur *{question_thread.mention}*.""",
-            message_success=f"**Campagne de sondage {self.__campaign['name']}** : {interaction.user.mention} a publié son vote sur *{question_thread.mention}*",
+            message_start=f"""Sondage **{self.__campaign["name"]}** : {interaction.author.mention} souhaite partager son vote sur *{question_thread.mention}*.""",
+            message_success=f"Sondage **{self.__campaign['name']}** : {interaction.user.mention} a publié son vote sur *{question_thread.mention}*",
             task_info='button.poll.share'
         )
         await logger.log_start()
@@ -1082,8 +1082,8 @@ class ModalBuilder(disnake.ui.Modal):
         logger = Logger(
             self.__bot,
             log_group='Modal',
-            message_start=f"""**Campagne de sondage {self.__campaign}** : un membre a voté sur {self.__poll_title}.""",
-            message_success=f"""**Campagne de sondage {self.__campaign}** : le vote d'un utilisateur sur {self.__poll_title} a été enregistré""",
+            message_start=f"""Sondage **{self.__campaign}** : un membre a voté sur {self.__poll_title}.""",
+            message_success=f"""Sondage **{self.__campaign}** : le vote d'un utilisateur sur {self.__poll_title} a été enregistré""",
             task_info='button.poll.share'
         )
         await logger.log_start()

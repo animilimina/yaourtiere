@@ -71,8 +71,13 @@ class Search(commands.Cog):
         for channel in channels:
             all_threads.extend([x for x in active_threads if x.parent == channel])
             if isinstance(channel, TextChannel):
-                async for thread in channel.archived_threads(limit=None):
-                    all_threads.append(thread)
+                try:
+                    async for thread in channel.archived_threads(limit=None):
+                        all_threads.append(thread)
+                except:
+                    await logger.log_message(f"""Impossible de lire les fils archivés du salon {channel.mention}.""")
+                finally:
+                    pass
 
         filtered_list = [x for x in all_threads if expression.lower() in x.name.lower()]
 
