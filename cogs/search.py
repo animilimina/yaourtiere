@@ -74,6 +74,8 @@ class Search(commands.Cog):
                 try:
                     async for thread in channel.archived_threads(limit=None):
                         all_threads.append(thread)
+                except:
+                    pass
                 finally:
                     pass
 
