@@ -46,11 +46,15 @@ class Tracker(DynamodbItem):
 
     def __get_interaction_detail(self) -> str:
         output = self.__default_value
-        interaction_data = json.loads(json.dumps(self.__interaction.data))
-        if 'name' in interaction_data.keys():
-            output = interaction_data['name']
-        elif 'custom_id' in interaction_data.keys():
-            output = interaction_data['custom_id']
+        data = json.loads(json.dumps(self.__interaction.data))
+        if 'name' in data.keys():
+            output_pieces = []
+            while data:
+                output_pieces.append(data["name"])
+                data = data["options"][0] if data["options"] else None
+            output = " ".join(output_pieces)
+        elif 'custom_id' in data.keys():
+            output = data['custom_id']
         return output
 
     def track_activity(self):

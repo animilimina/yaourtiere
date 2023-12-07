@@ -3,6 +3,7 @@ from disnake import Guild, TextChannel
 from disnake.ext import commands
 from disnake.ui import Button, View
 from tools.message_splitter import MessageSplitter
+from tools.archivist.logger import Logger
 
 
 class TestClass(commands.Cog):
@@ -11,30 +12,25 @@ class TestClass(commands.Cog):
         self.__guild: Guild = self.__bot.guilds[0]
 
     @commands.slash_command()
-    async def haut(self, inter):
-        return
+    async def this(self, inter):
+        pass
 
-    @haut.autocomplete("text")
-    async def autocomplete(self, inter: ApplicationCommandInteraction, user_input: str):
-        string = user_input.lower()
-        mylist = ['bonjour', 'bonsoir', 'salut', 'sabord', 'bonbon', 'bretagne', 'baleine', 'ballon', 'bal masqué']
-        return [x for x in mylist if string in x]
+    @this.sub_command_group()
+    async def new(self, inter):
+        pass
 
-    @haut.sub_command_group()
-    async def a(self, inter):
-        return
+    @new.sub_command()
+    async def test(self, inter: ApplicationCommandInteraction):
+        logger = Logger(
+            self.__bot,
+            log_group='Commande',
+            interaction=inter,
+            task_info='command.test.test'
+        )
+        await logger.log_start('youpi')
 
-    @haut.sub_command_group()
-    async def b(self, inter):
-        return
+        await logger.log_success('youpa')
 
-    @a.sub_command()
-    async def bas(self, inter, text: str):
-        await inter.response.send_message('a: ' + text)
-
-    @b.sub_command()
-    async def bas(self, inter, text: str):
-        await inter.response.send_message('b: ' + text)
 
 
 def setup(bot):
