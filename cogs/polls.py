@@ -40,7 +40,15 @@ class Poll(commands.Cog):
             return []
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def poll_campaign_create(self, interaction: ApplicationCommandInteraction, name: str, channel: GuildChannel,
+    async def poll(self, interaction: ApplicationCommandInteraction):
+        pass
+
+    @poll.sub_command_group()
+    async def campaign(self, interaction: ApplicationCommandInteraction):
+        pass
+
+    @campaign.sub_command()
+    async def create(self, interaction: ApplicationCommandInteraction, name: str, channel: GuildChannel,
                                    public_message_id: str, private_message_id: str, newcomers: bool = False):
         """
         Crée une campagne de sondage à partir de deux messages de ce canal. Un salon peut être spécifié
@@ -122,8 +130,8 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def poll_campaign_edit(self, interaction: ApplicationCommandInteraction, name: str,
+    @campaign.sub_command()
+    async def edit(self, interaction: ApplicationCommandInteraction, name: str,
                                  channel: GuildChannel = None, public_message_id: str = None,
                                  private_message_id: str = None, newcomers: bool = None):
         """
@@ -207,8 +215,8 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def poll_campaign_list(self, interaction: ApplicationCommandInteraction):
+    @campaign.sub_command()
+    async def list(self, interaction: ApplicationCommandInteraction):
         """
         Liste toutes les campagnes de sondage existantes et les salons associés.
         """
@@ -241,8 +249,8 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def poll_campaign_check(self, interaction: ApplicationCommandInteraction, name: str):
+    @campaign.sub_command()
+    async def check(self, interaction: ApplicationCommandInteraction, name: str):
         """
         Affiche les informations d'une campagne de sondages.
 
@@ -328,7 +336,7 @@ class Poll(commands.Cog):
         return
 
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def poll_campaign_delete(self, interaction: ApplicationCommandInteraction, name: str,
+    async def delete(self, interaction: ApplicationCommandInteraction, name: str,
                                    confirmation: str = None):
         """
         ⚠️⚠️⚠️️ ACTION IRRÉVERSIBLE ⚠️⚠️⚠️ Supprime une campagne de sondage.
@@ -371,8 +379,12 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def poll_question_add(self, interaction: ApplicationCommandInteraction, campaign: str, id: str, title: str,
+    @poll.sub_command_group()
+    async def question(self, interaction: ApplicationCommandInteraction):
+        pass
+
+    @question.sub_command()
+    async def add(self, interaction: ApplicationCommandInteraction, campaign: str, id: str, title: str,
                                 options: int, label: str,
                                 channel: GuildChannel = None, description_message_id: str = '', emoji: str = None,
                                 long_input: bool = False, max_characters: int = 100, placeholder: str = None,
@@ -476,8 +488,8 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def poll_question_remove(self, interaction: ApplicationCommandInteraction, campaign: str, id: str):
+    @question.sub_command()
+    async def remove(self, interaction: ApplicationCommandInteraction, campaign: str, id: str):
         """
        Retire une question d'une campagne de sondage
 
@@ -528,8 +540,8 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def poll_campaign_start(self, interaction: ApplicationCommandInteraction, name: str,
+    @campaign.sub_command()
+    async def start(self, interaction: ApplicationCommandInteraction, name: str,
                                   confirmation: str = None, auto_setup: bool = False,
                                   send_private_message: bool = False):
         """
@@ -620,8 +632,8 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def poll_campaign_stop(self, interaction: ApplicationCommandInteraction, name: str, confirmation: str = None):
+    @campaign.sub_command()
+    async def stop(self, interaction: ApplicationCommandInteraction, name: str, confirmation: str = None):
         """
         Met fin à une campagne de sondage.
 
@@ -672,8 +684,8 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
-    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
-    async def poll_campaign_statistics(self, interaction: ApplicationCommandInteraction, name: str):
+    @campaign.sub_command()
+    async def statistics(self, interaction: ApplicationCommandInteraction, name: str):
         """
         Affiche les statistiques d'une campagne de sondage.
 
@@ -741,14 +753,14 @@ class Poll(commands.Cog):
         await logger.log_success(
             f"""Les statistiques de la campagne de sondage "{name}" ont été affichées sur {message.jump_url}""")
 
-    @poll_campaign_edit.autocomplete("name")
-    @poll_campaign_check.autocomplete("name")
-    @poll_campaign_delete.autocomplete("name")
-    @poll_question_add.autocomplete("campaign")
-    @poll_question_remove.autocomplete("campaign")
-    @poll_campaign_start.autocomplete("name")
-    @poll_campaign_stop.autocomplete("name")
-    @poll_campaign_statistics.autocomplete("name")
+    @edit.autocomplete("name")
+    @check.autocomplete("name")
+    @delete.autocomplete("name")
+    @add.autocomplete("campaign")
+    @remove.autocomplete("campaign")
+    @start.autocomplete("name")
+    @stop.autocomplete("name")
+    @statistics.autocomplete("name")
     async def autocomplete_poll_campaign_name(self, inter: ApplicationCommandInteraction, user_input: str):
         string = user_input.lower()
         return [x["name"] for x in self.__settings if string in x["name"]]
