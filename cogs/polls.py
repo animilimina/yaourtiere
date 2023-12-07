@@ -7,7 +7,7 @@ from disnake import AllowedMentions, ApplicationCommandInteraction, Embed, Guild
 from disnake.abc import GuildChannel
 from disnake.ext import commands
 from disnake.ui import Button, View
-from services.dynamodb import DynamodbItem
+from services.dynamodb import DynamodbItem, DynamodbExtractor
 from time import sleep
 from tools.archivist.logger import Logger
 from tools.directory_managers import create_directory
@@ -431,7 +431,6 @@ class Poll(commands.Cog):
             await logger.log_failure()
             return
 
-
         if len([x for x in poll_campaign_settings["questions"] if x["id"] == id]) > 0:
             await logger.log_message(f"""Une question "{id}" existe déjà dans la campagne "{campaign}".""")
             await logger.log_failure()
@@ -624,12 +623,12 @@ class Poll(commands.Cog):
     @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
     async def poll_campaign_stop(self, interaction: ApplicationCommandInteraction, name: str, confirmation: str = None):
         """
-        Lance une campagne de sondage.
+        Met fin à une campagne de sondage.
 
         Parameters
         ----------
         name: :class: str
-            Le nom de la campagne à débuter.
+            Le nom de la campagne à interrompre.
         confirmation: class: str
             Pour valider, taper "INTERROMPRE LA CAMPAGNE".
         """
@@ -673,6 +672,74 @@ class Poll(commands.Cog):
         await logger.log_success()
         return
 
+    @commands.slash_command(default_member_permissions=Permissions(moderate_members=True))
+    async def poll_campaign_statistics(self, interaction: ApplicationCommandInteraction, name: str):
+        """
+        Affiche les statistiques d'une campagne de sondage.
+
+        Parameters
+        ----------
+        name: :class: str
+            Le nom de la campagne.
+        """
+        logger = Logger(
+            self.__bot,
+            log_group='Commande',
+            message_start=f"""{interaction.author.mention} a demandé l'arrêt de la campagne de sondage "{name}".""",
+            message_success=f"""La campagne de sondage "{name}" a été arrêtée.""",
+            message_failure=f"""La campagne de sondage "{name}" n'a pas été arrêtée.""",
+            task_info='command.poll.campaign stop',
+            interaction=interaction
+        )
+
+        await logger.log_start(
+            f"""{interaction.author.mention} a demandé l'affichage des statistiques de la campagne de sondage "{name}".""")
+
+        item_type = f"poll_{name}"
+        extraction = DynamodbExtractor(item_type).extraction
+
+        poll_campaign_settings = [x for x in self.__settings if x["name"] == name][0]
+        total_voters = len(extraction)
+
+        categories = {}
+        for question in poll_campaign_settings["questions"]:
+            categories[question["id"]] = {}
+            categories[question["id"]]["title"] = question["title"]
+
+        for question_id, value in categories.items():
+            all_voters = [x[question_id] for x in extraction if question_id in x.keys()]
+            value["voters"] = len(all_voters)
+            all_votes = []
+            for voter in all_voters:
+                for vote in voter["vote"]:
+                    if vote not in all_votes:
+                        all_votes.append(vote)
+            value["votes"] = sum([len(x["vote"]) for x in all_voters])
+            value["values"] = len(all_votes)
+
+        text: str = f"""Campagne de sondage "**{name}**": \nParticipants: {total_voters}"""
+        embeds = []
+        for category in categories.values():
+            embed_title = f"""__**{category["title"]}**__"""
+            embed_description = f"""Participants : {category["voters"]}"""
+            embed_description += f"""\nVotes : {category["votes"]}"""
+            embed_description += f"""\nVotes distincts : {category["values"]}"""
+            embed = Embed(
+                title=embed_title,
+                description=embed_description
+            )
+            embeds.append(embed)
+
+        message = await interaction.channel.send(text, embeds=embeds[:10],
+                                                 allowed_mentions=AllowedMentions(everyone=False, users=False))
+        embeds = embeds[10:]
+        while embeds:
+            await interaction.channel.send(embeds=embeds[:10],
+                                           allowed_mentions=AllowedMentions(everyone=False, users=False))
+            embeds = embeds[10:]
+
+        await logger.log_success(f"""Les statistiques de la campagne de sondage "{name}" ont été affichées sur {message.jump_url}""")
+
     @poll_campaign_edit.autocomplete("name")
     @poll_campaign_check.autocomplete("name")
     @poll_campaign_delete.autocomplete("name")
@@ -680,6 +747,7 @@ class Poll(commands.Cog):
     @poll_question_remove.autocomplete("campaign")
     @poll_campaign_start.autocomplete("name")
     @poll_campaign_stop.autocomplete("name")
+    @poll_campaign_statistics.autocomplete("name")
     async def autocomplete_poll_campaign_name(self, inter: ApplicationCommandInteraction, user_input: str):
         string = user_input.lower()
         return [x["name"] for x in self.__settings if string in x["name"]]
@@ -727,7 +795,8 @@ class PrivateMessage(commands.Cog):
                 await self.__send_vote_options_to_member(member)
             except:
                 pass
-        await logger.log_message(f"""Le message privé pour la campagne de sondage "{self.__campaign["name"]} a été envoyé à {self.__members_contacted} membres.""")
+        await logger.log_message(
+            f"""Le message privé pour la campagne de sondage "{self.__campaign["name"]} a été envoyé à {self.__members_contacted} membres.""")
         return
 
     async def __populate_view(self):
