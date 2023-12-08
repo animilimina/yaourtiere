@@ -51,7 +51,7 @@ class Tracker(DynamodbItem):
             output_pieces = []
             while data:
                 output_pieces.append(data["name"])
-                data = data["options"][0] if data["options"] else None
+                data = data["options"][0] if "options" in data.keys() else None
             output = " ".join(output_pieces)
         elif 'custom_id' in data.keys():
             output = data['custom_id']
