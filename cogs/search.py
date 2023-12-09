@@ -89,7 +89,7 @@ class Search(commands.Cog):
             temporary_message = await interaction.channel.send(f"Pas de résultat : {result.jump_url}")
         else:
             message = f"""{user.mention} tu trouveras "**{expression}**" dans :"""
-            embed_text = '\n'.join([x.parent.name + ' > ' + x.jump_url for x in filtered_list])
+            embed_text = '\n'.join([f"""{x.parent.name} > [#{x.name}]({x.jump_url})""" for x in filtered_list])
             embed_text_splitter = MessageSplitter(embed_text)
             texts = embed_text_splitter.get_message_split()
 
