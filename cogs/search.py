@@ -1,4 +1,5 @@
 from config.variables import constants
+from copy import copy
 from disnake import ApplicationCommandInteraction, Embed, Guild, Permissions, ApplicationCommandInteraction, Message, \
     TextChannel
 from disnake.abc import GuildChannel
@@ -79,14 +80,24 @@ class Search(commands.Cog):
                 finally:
                     pass
 
-        filtered_list = [x for x in all_threads if expression.lower() in x.name.lower()]
+        filtered_list = copy(all_threads)
+        search_words = expression.lower().split(' ')
+        for word in search_words:
+            filtered_list = [x for x in filtered_list if word in x.name.lower()]
+        result_nb = len(filtered_list)
 
-        if len(filtered_list) == 0:
+        if result_nb > 10:
+            message = f"""{user.mention} il y a trop de résultats ({result_nb}) pour "**{expression}**", essaie d'affiner ta recherche."""
+            result = await result_channel.send(message)
+            await logger.log_success(
+                f"La recherche de fil de {user.mention} a donné trop de résultats. {result.jump_url}")
+            temporary_message = await interaction.channel.send(f"""Trop de résultats pour "**{expression}**" : {result.jump_url}""")
+        elif result_nb == 0:
             message = f"""{user.mention} désolé, pas de résultat pour "**{expression}**". À toi de créer ce fil ;-)"""
             result = await result_channel.send(message)
             await logger.log_success(
                 f"La recherche de fil de {user.mention} n'a pas donné de résultat. {result.jump_url}")
-            temporary_message = await interaction.channel.send(f"Pas de résultat : {result.jump_url}")
+            temporary_message = await interaction.channel.send(f"""Pas de résultat pour "**{expression}**" : {result.jump_url}""")
         else:
             message = f"""{user.mention} tu trouveras "**{expression}**" dans :"""
             embed_text = '\n'.join([f"""{x.parent.name} > [#{x.name}]({x.jump_url})""" for x in filtered_list])
@@ -99,7 +110,7 @@ class Search(commands.Cog):
                 await result_channel.send(embed=Embed(description=texts[0]))
                 texts = texts[1:]
             await logger.log_success(f"La recherche de fil de {user.mention} a abouti. {result.jump_url}")
-            temporary_message = await interaction.channel.send(f"Tes résultats sont ici : {result.jump_url}")
+            temporary_message = await interaction.channel.send(f"""Tes résultats pour "**{expression}**" sont ici : {result.jump_url}""")
 
         await temporary_message.delete(delay=5)
         return
