@@ -6,7 +6,8 @@ import yaml
 def clean_text(text: str) -> str:
     text_lower = text.lower()
     text_no_punctuation = re.sub(r'[^\w\s]', '', text_lower)
-    text_no_accent = unidecode(text_no_punctuation)
+    text_no_apostrophe = text_no_punctuation.replace("'", "")
+    text_no_accent = unidecode(text_no_apostrophe)
     text_parts = text_no_accent.split(' ')
     output = ' '.join([x for x in text_parts if x])
     return output
