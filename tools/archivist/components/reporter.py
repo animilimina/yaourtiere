@@ -6,6 +6,7 @@ class Reporter:
     """
     Reports activity in the bot log thread
     """
+
     def __init__(self, bot):
         self.__channel = bot.get_channel(secrets.log_thread)
 
@@ -24,7 +25,9 @@ class Reporter:
         :param message: Message to be posted.
         """
 
-        return await self.__channel.send(content=message, allowed_mentions=AllowedMentions(everyone=False, users=False))
+        return await self.__channel.send(content=message,
+                                         allowed_mentions=AllowedMentions(everyone=False, users=False),
+                                         suppress_embeds=True)
 
     async def reject(self, user):
         """
