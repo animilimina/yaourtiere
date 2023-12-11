@@ -11,7 +11,7 @@ from services.dynamodb import DynamodbItem, DynamodbExtractor
 from time import sleep
 from tools.archivist.logger import Logger
 from tools.directory_managers import create_directory
-from tools.text_managers import read_yaml, write_yaml
+from tools.text_managers import clean_text, read_yaml, write_yaml
 import os
 
 
@@ -708,6 +708,7 @@ class Poll(commands.Cog):
         total_voters = len(extraction)
         total_votes = 0
         all_votes = []
+        all_votes_clean = []
 
         categories = {}
         for question in poll_campaign_settings["questions"]:
@@ -718,26 +719,35 @@ class Poll(commands.Cog):
             all_voters = [x[question_id] for x in extraction if question_id in x.keys()]
             value["voters"] = len(all_voters)
             question_votes = []
+            question_votes_clean = []
             for voter in all_voters:
                 for vote in voter["vote"]:
                     if vote not in question_votes:
                         question_votes.append(vote)
                     if vote not in all_votes:
                         all_votes.append(vote)
+                    vote_clean = clean_text(vote)
+                    if vote_clean not in question_votes_clean:
+                        question_votes_clean.append(vote_clean)
+                    if vote_clean not in all_votes_clean:
+                        all_votes_clean.append(vote_clean)
             value["votes"] = sum([len(x["vote"]) for x in all_voters])
             total_votes += value["votes"]
             value["values"] = len(question_votes)
+            value["values_clean"] = len(question_votes_clean)
 
         text: str = f"""Sondage **{poll}**:
         Participants: {total_voters}
         Votes : {total_votes}
-        Réponses distinctes : {len(all_votes)}"""
+        Réponses distinctes : {len(all_votes)}
+        Réponses nettoyées distinctes : {len(all_votes_clean)}"""
         embeds = []
         for category in categories.values():
             embed_title = f"""__**{category["title"]}**__"""
             embed_description = f"""Participants : {category["voters"]}"""
             embed_description += f"""\nVotes : {category["votes"]}"""
             embed_description += f"""\nRéponses distinctes : {category["values"]}"""
+            embed_description += f"""\nRéponses nettoyées distinctes : {category["values_clean"]}"""
             embed = Embed(
                 title=embed_title,
                 description=embed_description
