@@ -962,11 +962,9 @@ class PrivateMessage(commands.Cog):
         logger = Logger(
             self.__bot,
             log_group='Bouton',
-            message_start=f"""Sondage **{self.__campaign["name"]}** : {interaction.author.mention} souhaite partager son vote sur *{question_thread.mention}*.""",
-            message_success=f"Sondage **{self.__campaign['name']}** : {interaction.user.mention} a publié son vote sur *{question_thread.mention}*",
             task_info='button.poll.share'
         )
-        await logger.log_start()
+        await logger.log_start(f"""Sondage **{self.__campaign["name"]}** : {interaction.author.mention} souhaite partager son vote sur *{question_thread.mention}*.""")
         await interaction.response.defer()
 
         embed = interaction.message.embeds[0]
@@ -996,7 +994,7 @@ class PrivateMessage(commands.Cog):
                         )
         view_private.add_item(button)
         await interaction.message.edit(view=view_private)
-        await logger.log_success()
+        await logger.log_success(f"Sondage **{self.__campaign['name']}** : {interaction.user.mention} a publié son vote sur *{public_message.jump_url}*")
 
         top_item.save_vote(poll_id, user_vote["vote"], user_vote["private_message_id"], public_message_id)
 
@@ -1084,7 +1082,7 @@ class ModalBuilder(disnake.ui.Modal):
             log_group='Modal',
             message_start=f"""Sondage **{self.__campaign}** : un membre a voté sur {self.__poll_title}.""",
             message_success=f"""Sondage **{self.__campaign}** : le vote d'un utilisateur sur {self.__poll_title} a été enregistré""",
-            task_info='button.poll.share'
+            task_info='button.poll.vote'
         )
         await logger.log_start()
         self.__interaction = interaction
