@@ -26,7 +26,7 @@ class Reporter:
         """
 
         return await self.__channel.send(content=message,
-                                         allowed_mentions=AllowedMentions(everyone=False, users=False),
+                                         allowed_mentions=AllowedMentions(everyone=False, users=False, roles=False),
                                          suppress_embeds=True)
 
     async def reject(self, user):

@@ -7,6 +7,7 @@
 pyenv.cfg
 ../../yaourtiere/.env
 /notebooks/
+/config/moderation/*
 /config/poll/*
 /config/search/*
 /config/sticky_message/*
