@@ -1,10 +1,8 @@
 from config.variables import constants
 from copy import copy
-from disnake import ApplicationCommandInteraction, Embed, Guild, Permissions, ApplicationCommandInteraction, Message, \
-    TextChannel
+from disnake import Embed, Guild, ApplicationCommandInteraction, TextChannel
 from disnake.abc import GuildChannel
 from disnake.ext import commands
-from disnake.ui import Button, View
 import os
 from tools.archivist.logger import Logger
 from tools.message_splitter import MessageSplitter
@@ -52,9 +50,9 @@ class Search(commands.Cog):
             interaction=interaction
         )
 
-        await logger.log_start(f"""{interaction.author.mention} cherche un fil contenant "**{expression}**".""")
-
         user = interaction.author
+
+        await logger.log_start(f"""{user.mention} cherche un fil contenant "**{expression}**".""")
 
         result_channel = interaction.channel
         self.__check_settings_existence('thread')
