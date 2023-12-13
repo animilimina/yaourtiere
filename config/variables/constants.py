@@ -1,3 +1,4 @@
+DIRECTORY_MODERATION = 'config/moderation/'
 DIRECTORY_POLLS = 'config/poll/'
 DIRECTORY_SEARCH = 'config/search/'
 DIRECTORY_STICKY_MESSAGES = 'config/sticky_message/'
