@@ -231,21 +231,24 @@ class Moderation(Cog):
         watcher_users = [x for role in watcher_roles for x in role.members]
 
         watchers_already_in_thread = [x for x in watcher_users if x in thread.members]
-        if watchers_already_in_thread:
-            await logger.log_message(
-                f"""Observateurs déjà présents sur {thread.mention} : {"".join([x.mention for x in watchers_already_in_thread])}""")
-            await logger.log_message(
-                f"""Il faut encore ajouter {watchers_to_add} observateur{'s' if watchers_to_add > 1 else ''} au fil {thread.mention}""")
 
         watchers_users_unique = []
         for watcher in watcher_users:
             if watcher not in watchers_users_unique and watcher not in watchers_already_in_thread:
                 watchers_users_unique.append(watcher)
         watchers_to_add = settings["watchers"] - len(watchers_already_in_thread)
+
+        if watchers_already_in_thread:
+            await logger.log_message(
+                f"""Observateurs déjà présents sur {thread.mention} : {"".join([x.mention for x in watchers_already_in_thread])}""")
+            await logger.log_message(
+                f"""Il faut encore ajouter {watchers_to_add} observateur{'s' if watchers_to_add > 1 else ''} au fil {thread.mention}""")
+
         if watchers_to_add < 1:
             await logger.success(
                 f"Le nombre requis d'observateurs est déjà sur le fil {thread.mention}. Inutile d'en ajouter.")
             return
+
         if not watchers_users_unique:
             await logger.log_success(f"Tous les observateurs disponibles sont déjà sur le fil {thread.mention}.")
             return
