@@ -1,5 +1,5 @@
 from config.variables import constants
-from disnake import ApplicationCommandInteraction, Guild, Role, Thread
+from disnake import AllowedMentions, ApplicationCommandInteraction, Guild, Role, Thread
 from disnake.ext.commands import Cog, default_member_permissions, InteractionBot, slash_command
 import os
 import random
@@ -155,9 +155,10 @@ class Moderation(Cog):
             text += f"""\n{role.mention}: {"".join([x.mention for x in role.members])}"""
 
         messages = MessageSplitter(text).get_message_split()
-        result = await interaction.channel.send(messages[0])
+        mentions = AllowedMentions(everyone=False, users=False, roles=False)
+        result = await interaction.channel.send(messages[0], allowed_mentions=mentions)
         for message in messages[1:]:
-            await interaction.channel.send(message)
+            await interaction.channel.send(message, allowed_mentions=mentions)
 
         await logger.log_success(f"""Les infos des observateurs ont été affichées. {result.jump_url}""")
         return
