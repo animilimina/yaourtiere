@@ -219,7 +219,8 @@ class Moderation(Cog):
         )
 
         settings = self.__check_settings_existence("watchers")
-        await logger.log_start(f"""Le fil {thread.mention} a été créé par {thread.owner.mention}, il faut {settings["watchers"]} observateur{'s' if settings["watchers"] > 1 else ''}.""")
+        await logger.log_start(
+            f"""Le fil {thread.mention} a été créé par {thread.owner.mention}, il faut {settings["watchers"]} observateur{'s' if settings["watchers"] > 1 else ''}.""")
 
         guild_roles = await self.__guild.fetch_roles()
         watcher_roles = [x for x in guild_roles if x.id in settings["roles"]]
@@ -230,7 +231,7 @@ class Moderation(Cog):
 
         watcher_users = [x for role in watcher_roles for x in role.members]
 
-        watchers_already_in_thread = [x for x in watcher_users if x in thread.members]
+        watchers_already_in_thread = [x for x in watcher_users if x == thread.owner]
 
         watchers_users_unique = []
         for watcher in watcher_users:
@@ -241,11 +242,12 @@ class Moderation(Cog):
         if watchers_already_in_thread:
             await logger.log_message(
                 f"""Observateurs déjà présents sur {thread.mention} : {"".join([x.mention for x in watchers_already_in_thread])}""")
-            await logger.log_message(
-                f"""Il faut encore ajouter {watchers_to_add} observateur{'s' if watchers_to_add > 1 else ''} au fil {thread.mention}""")
+            if watchers_to_add > 0:
+                await logger.log_message(
+                    f"""Il faut encore ajouter {watchers_to_add} observateur{'s' if watchers_to_add > 1 else ''} au fil {thread.mention}""")
 
         if watchers_to_add < 1:
-            await logger.success(
+            await logger.log_success(
                 f"Le nombre requis d'observateurs est déjà sur le fil {thread.mention}. Inutile d'en ajouter.")
             return
 
@@ -255,7 +257,8 @@ class Moderation(Cog):
 
         if watchers_to_add > len(watchers_users_unique):
             watchers_to_add = len(watchers_users_unique)
-            await logger.log_message(f"""{watchers_to_add} observateur{'s sont disponibles' if watchers_to_add > 1 else ' est disponible'} pour l'ajout.""")
+            await logger.log_message(
+                f"""{watchers_to_add} observateur{'s sont disponibles' if watchers_to_add > 1 else ' est disponible'} pour l'ajout.""")
 
         random.seed(time.time())
         watchers_picked = random.sample(watchers_users_unique, watchers_to_add)
