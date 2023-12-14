@@ -152,7 +152,7 @@ class Moderation(Cog):
         text = f"""Observateurs par fil : {settings["watchers"]}"""
         text += "\n**__Roles du groupe des observateurs__**" if watcher_roles else "\nAucun rôle dans le groupe des observateurs !"
         for role in watcher_roles:
-            text += f"""\n{role.mention}: {"".join([x.mention for x in role.members])}"""
+            text += f"""\n{role.mention}: {" ".join([x.mention for x in role.members])}"""
 
         messages = MessageSplitter(text).get_message_split()
         mentions = AllowedMentions(everyone=False, users=False, roles=False)
