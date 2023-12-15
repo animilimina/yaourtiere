@@ -589,10 +589,13 @@ class TestCollector(commands.Cog):
         return
 
     def __check_message_type(self, emoji_settings: dict, message: Message) -> str | None:
+        channel_message_types = []
         for reaction in message.reactions:
-            type = self.__check_reaction(emoji_settings, reaction)
-            if type:
-                return type
+            channel_message_types.append(self.__check_reaction(emoji_settings, reaction))
+        types = ["new_game", "clue", "good_answer", "close", "wrong_answer", "no", "yes"]
+        for message_type in types:
+            if message_type in channel_message_types:
+                return message_type
         return None
 
     def __check_reaction(self, emoji_settings: dict, reaction: Reaction) -> str | None:
