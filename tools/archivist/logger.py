@@ -48,30 +48,33 @@ class Logger:
         text += ' ' + message
         return await self.__logger.log(text)
 
-    def __track_activity(self):
+    def __track_activity(self) -> None:
         if not self.__activity_was_tracked:
             self.__tracker.track_activity()
             self.__activity_was_tracked = True
+        return
 
-    async def __log_rejection(self):
+    async def __log_rejection(self) -> None:
         await self.__interactor.reject()
         await self.__logger.reject(self.__user)
+        return
 
-    async def log_message(self, message):
+    async def log_message(self, message) -> None:
         message_split = MessageSplitter(message).get_message_split()
         for sub_message in message_split:
             await self.__logger.log(sub_message)
+        return
 
-    async def log_success(self, message: str = None, show_emoji: bool = True):
+    async def log_success(self, message: str = None, show_emoji: bool = True) -> None:
         self.__track_activity()
         emoji = self.set_emoji("✅", show_emoji)
         message = message if message is not None else self.__message_success
         log_message = await self.__log(emoji, message)
-        await self.__interactor.success(log_message)
+        return await self.__interactor.success(log_message)
 
-    async def log_failure(self, message: str = None, show_emoji: bool = True):
+    async def log_failure(self, message: str = None, show_emoji: bool = True) -> None:
         self.__track_activity()
         emoji = self.set_emoji("❌", show_emoji)
         message = message if message is not None else self.__message_failure
         log_message = await self.__log(emoji, message)
-        await self.__interactor.failure(log_message)
+        return await self.__interactor.failure(log_message)

@@ -5,6 +5,7 @@ from disnake.abc import GuildChannel
 from disnake.ext import commands
 import os
 from tools.archivist.logger import Logger
+from tools.directory_managers import create_directory
 from tools.message_splitter import MessageSplitter
 from tools.text_managers import read_yaml, write_yaml
 
@@ -14,6 +15,7 @@ class Search(commands.Cog):
         self.__bot: commands.InteractionBot = bot
         self.__guild: Guild = self.__bot.guilds[0]
         self.__settings_directory: str = constants.DIRECTORY_SEARCH
+        create_directory(self.__settings_directory)
         self.__settings: dict = {}
         self.__read_settings()
 
