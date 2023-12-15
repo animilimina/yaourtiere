@@ -580,7 +580,9 @@ class TestCollector(commands.Cog):
 
     def __check_message_type(self, emoji_settings: dict, message: Message) -> str | None:
         for reaction in message.reactions:
-            return self.__check_reaction(emoji_settings, reaction)
+            type = self.__check_reaction(emoji_settings, reaction)
+            if type:
+                return type
         return None
 
     def __check_reaction(self, emoji_settings: dict, reaction: Reaction) -> str | None:
