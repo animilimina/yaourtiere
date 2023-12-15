@@ -486,8 +486,14 @@ class TestCollector(commands.Cog):
                       "good_answer" in x.keys() and x["date_end"] > str(date_min)]
         ranking_raw = collections.Counter(winner_ids).most_common(top if top > 0 else None)
         for winner in ranking_raw:
-            member = await self.__guild.fetch_member(winner[0])
-            text += f"""\n\t{member.mention} : {winner[1]} point{"s" if winner[1] > 1 else ""}."""
+            try:
+                member = await self.__guild.fetch_member(winner[0])
+                member = member.mention
+            except:
+                member = f"<@{winner[0]}>"
+            finally:
+                pass
+            text += f"""\n\t{member} : {winner[1]} point{"s" if winner[1] > 1 else ""}."""
 
         messages = MessageSplitter(text).get_message_split()
         output: Message = await interaction.channel.send(messages[0],
@@ -591,9 +597,10 @@ class TestCollector(commands.Cog):
 
     def __check_reaction(self, emoji_settings: dict, reaction: Reaction) -> str | None:
         emoji = self.__get_reaction_text(reaction)
-        for key, value in emoji_settings.items():
-            if emoji in value:
-                return key
+        types = ["new_game", "clue", "good_answer", "close", "wrong_answer", "no", "yes"]
+        for message_type in types:
+            if emoji in emoji_settings[message_type]:
+                return message_type
         return None
 
     @staticmethod
