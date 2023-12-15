@@ -56,10 +56,18 @@ class DynamodbExtractor(DynamodbManager):
 
     def __extract_items(self):
         if self.__item_id_min:
-            response = self._table.query(KeyConditionExpression=
-                                         Key('item_type').eq(self.__item_type) &
-                                         Key('item_id').between(self.__item_id_min, self.__item_id_max)
-                                         )
+            key_condition_expression = Key('item_type').eq(self.__item_type) & Key('item_id').between(
+                self.__item_id_min, self.__item_id_max)
         else:
-            response = self._table.query(KeyConditionExpression=Key('item_type').eq(self.__item_type))
+            key_condition_expression = Key('item_type').eq(self.__item_type)
+
+        response = self._table.query(KeyConditionExpression=key_condition_expression)
+        items = response['Items']
+
+        while 'LastEvaluatedKey' in response:
+            response = self._table.query(ExclusiveStartKey=response['LastEvaluatedKey'],
+                                          KeyConditionExpression=key_condition_expression
+                                          )
+            items.extend(response['Items'])
+
         return response['Items']
