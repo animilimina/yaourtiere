@@ -379,8 +379,12 @@ class TestCollector(commands.Cog):
             await logger.log_message(f"{channel.mention} n'a pas de paramètres de collecte.")
             return await logger.log_failure()
 
-        settings["collection"]["active"]["last_game_id"] = 0
-        settings["collection"]["active"]["last_message_id"] = 0
+        settings["collection"] = {
+            "active": settings["collection"]["active"],
+            "last_game_id": 0,
+            "last_message_id": 0
+        }
+
         self.__write_settings(channel_id)
         return await logger.log_success()
 
