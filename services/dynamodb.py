@@ -70,4 +70,4 @@ class DynamodbExtractor(DynamodbManager):
                                           )
             items.extend(response['Items'])
 
-        return response['Items']
+        return items
