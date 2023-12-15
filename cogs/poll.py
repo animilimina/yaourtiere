@@ -705,7 +705,8 @@ class Poll(commands.Cog):
         extraction = DynamodbExtractor(item_type).extraction
 
         poll_campaign_settings = [x for x in self.__settings if x["name"] == poll][0]
-        total_voters = len(extraction)
+        users_who_displayed_at_least_one_modal = len(extraction)
+        total_voters = len([x for x in extraction if len(x.keys()) > 2])
         total_votes = 0
         all_votes = []
         all_votes_clean = []
@@ -737,6 +738,7 @@ class Poll(commands.Cog):
             value["values_clean"] = len(question_votes_clean)
 
         text: str = f"""Sondage **{poll}**:
+        Ont affiché un formulaire: {users_who_displayed_at_least_one_modal}
         Participants: {total_voters}
         Votes : {total_votes}
         Réponses distinctes : {len(all_votes)}
