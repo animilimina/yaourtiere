@@ -775,7 +775,7 @@ class Poll(commands.Cog):
     @start.autocomplete("poll")
     @stop.autocomplete("poll")
     @statistics.autocomplete("poll")
-    async def autocomplete_poll_campaign_name(self, inter: ApplicationCommandInteraction, user_input: str):
+    async def autocomplete_poll_name(self, inter: ApplicationCommandInteraction, user_input: str):
         string = user_input.lower()
         return [x["name"] for x in self.__settings if string in x["name"]]
 
