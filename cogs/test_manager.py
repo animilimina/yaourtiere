@@ -1,8 +1,7 @@
 import collections
 from config.variables import constants
 from datetime import datetime, timedelta
-from disnake import AllowedMentions, ApplicationCommandInteraction, Embed, Guild, Message, Permissions, Reaction, \
-    TextChannel
+from disnake import AllowedMentions, ApplicationCommandInteraction, Guild, Message, Reaction, TextChannel
 from disnake.abc import GuildChannel
 from disnake.ext import commands, tasks
 from services.dynamodb import DynamodbExtractor, DynamodbItem
