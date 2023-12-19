@@ -534,13 +534,13 @@ class TestCollector(commands.Cog):
                 channels_to_collect[key] = settings
 
         for channel_id in channels_to_collect.keys():
-            # try:
-            channel: TextChannel = await self.__guild.fetch_channel(channel_id)
-            await self.__collect_channel(channel, logger)
-            # except:
-            #     await logger.log_message(f"""Impossible de trouver le fil ou salon "**{self.__settings[channel_id]["info"]["name"]}**" (id : {channel_id}).""")
-            # finally:
-            #     pass
+            try:
+                channel: TextChannel = await self.__guild.fetch_channel(channel_id)
+                await self.__collect_channel(channel, logger)
+            except:
+                await logger.log_message(f"""Impossible de collecter sur le fil ou salon "**{self.__settings[channel_id]["info"]["name"]}**" (id : {channel_id}).""")
+            finally:
+                pass
 
         return await logger.log_success("Fin de la collecte des tests.")
 
