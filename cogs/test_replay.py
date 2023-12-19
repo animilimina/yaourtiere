@@ -273,7 +273,6 @@ class TestReplay(commands.Cog):
             for option in options_left.split("_"):
                 options_int.append(int(option))
             clue_left, close_left, wrong_left, yes_left, no_left = tuple(options_int)
-            print(clue_left, close_left, wrong_left, yes_left, no_left)
         else:
             clue_left, close_left, wrong_left, yes_left, no_left = game.get_option_counts()
             options_left = f"{clue_left}_{close_left}_{wrong_left}_{yes_left}_{no_left}"
