@@ -518,7 +518,7 @@ class TestCollector(commands.Cog):
                 options.append(option)
         return [x for x in options if string in x]
 
-    @tasks.loop(hours=1)
+    @tasks.loop(hours=24)
     async def __collect_tests(self) -> None:
         logger = Logger(
             self.__bot,
@@ -542,6 +542,7 @@ class TestCollector(commands.Cog):
             finally:
                 pass
 
+        self.__read_settings()
         return await logger.log_success("Fin de la collecte des tests.")
 
     async def __collect_channel(self, channel: TextChannel, logger: Logger) -> None:
