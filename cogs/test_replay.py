@@ -218,8 +218,10 @@ class TestReplay(commands.Cog):
         return await logger.log_success(f"Le replay {message.jump_url} a été créé.")
 
     def __pick_question(self, thread: Thread, question_type: str) -> None:
-        type_settings = [x for x in self.__collector_info.items() if
-                         x[1]["info"]["type"] == question_type or question_type == 'all']
+        type_settings = []
+        for test_settings in self.__collector_info.items():
+            if test_settings[1]["info"]["type"] == question_type or question_type == 'all':
+                type_settings.extend([test_settings] * test_settings[1]["collection"]["last_game_id"])
         test = random.sample(type_settings, 1)[0]
         test_id = test[0]
         question_range = range(1, test[1]["collection"]["last_game_id"] + 1)
