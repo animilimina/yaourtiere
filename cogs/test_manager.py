@@ -1,8 +1,7 @@
 import collections
 from config.variables import constants
 from datetime import datetime, timedelta
-from disnake import AllowedMentions, ApplicationCommandInteraction, Embed, Guild, Message, Permissions, Reaction, \
-    TextChannel
+from disnake import AllowedMentions, ApplicationCommandInteraction, Guild, Message, Reaction, TextChannel
 from disnake.abc import GuildChannel
 from disnake.ext import commands, tasks
 from services.dynamodb import DynamodbExtractor, DynamodbItem
@@ -519,7 +518,7 @@ class TestCollector(commands.Cog):
                 options.append(option)
         return [x for x in options if string in x]
 
-    @tasks.loop(hours=1)
+    @tasks.loop(hours=24)
     async def __collect_tests(self) -> None:
         logger = Logger(
             self.__bot,
@@ -535,14 +534,15 @@ class TestCollector(commands.Cog):
                 channels_to_collect[key] = settings
 
         for channel_id in channels_to_collect.keys():
-            # try:
-            channel: TextChannel = await self.__guild.fetch_channel(channel_id)
-            await self.__collect_channel(channel, logger)
-            # except:
-            #     await logger.log_message(f"""Impossible de trouver le fil ou salon "**{self.__settings[channel_id]["info"]["name"]}**" (id : {channel_id}).""")
-            # finally:
-            #     pass
+            try:
+                channel: TextChannel = await self.__guild.fetch_channel(channel_id)
+                await self.__collect_channel(channel, logger)
+            except:
+                await logger.log_message(f"""Impossible de collecter sur le fil ou salon "**{self.__settings[channel_id]["info"]["name"]}**" (id : {channel_id}).""")
+            finally:
+                pass
 
+        self.__read_settings()
         return await logger.log_success("Fin de la collecte des tests.")
 
     async def __collect_channel(self, channel: TextChannel, logger: Logger) -> None:
