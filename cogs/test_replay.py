@@ -60,8 +60,9 @@ class GameManager(DynamodbItem):
 
     async def answer(self) -> Message:
         self.__current_message = self._item["good_answer"]
-        await self.__thread.send(f"""__**Bonne réponse trouvée par <@{self.__current_message["author_id"]}>**__""",
-                                 allowed_mentions=self.__allowed_mentions)
+        await self.__thread.send(
+            f"""__**La bonne réponse avait été trouvée par <@{self.__current_message["author_id"]}>**__""",
+            allowed_mentions=self.__allowed_mentions)
         message: Message = await self.__send_message()
         await message.add_reaction("🟢")
         try:
@@ -138,6 +139,7 @@ class TestReplay(commands.Cog):
         self.__settings: dict = {}
         self.__collector_info: dict = {}
         self.__read_settings()
+        self.__allowed_mentions: AllowedMentions = AllowedMentions(everyone=False, users=False)
 
     def __read_settings(self) -> None:
         for file in self.__get_file_list(self.__settings_directory):
@@ -370,6 +372,8 @@ class TestReplay(commands.Cog):
         test_id = game_info_split[0]
         game_id = game_info_split[1]
         game = GameManager(test_id, game_id, self.__guild, thread)
+        await thread.send(f"""||{interaction.author.mention} a demandé à afficher la bonne réponse.||""",
+                          allowed_mentions=self.__allowed_mentions)
         message_answer: Message = await game.answer()
         await logger.log_message(f"""La réponse a été affichée. {message_answer.jump_url}""")
 
@@ -407,6 +411,8 @@ class TestReplay(commands.Cog):
         options_left_split = options_left.split("_")
         options_left_split[options.index(option_type)] = str(int(options_left_split[options.index(option_type)]) - 1)
         options_left = "_".join(options_left_split)
+        await thread.send(f"""||{interaction.author.mention} a cliqué pour obtenir l'indice suivant :||""",
+                          allowed_mentions=self.__allowed_mentions)
         message: Message = await game.option(option_type, int(options_left_split[options.index(option_type)]))
         sticky_view: View = self.__build_new_sticky_view(thread, game, options_left=options_left)
         await thread.send(view=sticky_view)
