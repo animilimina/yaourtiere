@@ -82,7 +82,7 @@ class GameManager(DynamodbItem):
         no = len(self._item["no"])
         return clue, close, wrong, yes, no
 
-    async def option(self, option_type: str, index: int):
+    async def option(self, option_type: str, index: int) -> Message:
         self.__current_message = self._item[option_type][-index - 1]
         if option_type == "close":
             emoji = "🤏"
@@ -98,7 +98,7 @@ class GameManager(DynamodbItem):
             emoji = "🤷"
         message: Message = await self.__send_message()
         await message.add_reaction(emoji=emoji)
-        return
+        return message
 
 
 class AttachmentHandler:
@@ -245,16 +245,32 @@ class TestReplay(commands.Cog):
             message_success=f"""Sticky rafraîchi dans {message.channel.mention}.""",
         )
 
+        async for msg in message.channel.history(limit=100, before=message):
+            if msg.author == self.__bot.user:
+                view = View()
+                for component in msg.components:
+                    for button in component.children:
+                        view.add_item(Button(
+                            label=button.label,
+                            emoji=button.emoji,
+                            custom_id=button.custom_id,
+                            url=button.url
+                        ))
+                await msg.delete()
+                await message.channel.send(view=view)
+                break
+
         await logger.log_success()
 
     def __there_is_nothing_to_do(self, message: Message) -> bool:
         if message.author == self.__bot.user:
             return True
-        if message.channel.id not in self.__settings.keys():
+        if str(message.channel.id) not in self.__settings.keys():
             return True
         return False
 
-    def __build_new_sticky_view(self, thread: Thread, game: GameManager, options_left: str = None, message: Message = None):
+    def __build_new_sticky_view(self, thread: Thread, game: GameManager, options_left: str = None,
+                                message: Message = None):
         settings = self.__settings[str(thread.id)]
         settings["question_url"] = message.jump_url if message else settings["question_url"]
         view = View()
@@ -330,32 +346,55 @@ class TestReplay(commands.Cog):
         button_type = custom_id.split("|")[1]
         await interaction.message.delete()
         if button_type == "answer":
-            await self.__replay_answer(interaction.channel, custom_id, 'all')
+            await self.__replay_answer(interaction, custom_id, 'all')
         else:
             await self.__replay_option(interaction, custom_id)
+        return
 
-    async def __replay_answer(self, thread: Thread, button_custom_id: str, question_type: str):
+    async def __replay_answer(self, interaction: MessageInteraction, button_custom_id: str, question_type: str):
+        logger = Logger(
+            self.__bot,
+            log_group='Commande',
+            task_info='button.replay.answer',
+        )
+        await logger.log_start(
+            f"""{interaction.author.mention} a demandé la réponse dans le replay {interaction.channel.mention}.""")
+        await interaction.response.defer()
+
+        thread: Thread = interaction.channel
         custom_id_split = button_custom_id.split('|')
         game_info = custom_id_split[2]
         game_info_split = game_info.split("_")
         test_id = game_info_split[0]
         game_id = game_info_split[1]
         game = GameManager(test_id, game_id, self.__guild, thread)
-        await game.answer()
-        await thread.send("..." + "\n"*5 + "="*40)
+        message_answer: Message = await game.answer()
+        await logger.log_message(f"""La réponse a été affichée. {message_answer.jump_url}""")
+
+        await thread.send("..." + "\n" * 5 + "=" * 40)
         self.__pick_question(thread, question_type)
         thread_id = str(thread.id)
         settings: dict = self.__check_settings_existence(thread_id)
         game = GameManager(settings["test_id"], settings["game_id"], self.__guild, thread)
-        message = await game.new_game()
-        sticky_view: View = self.__build_new_sticky_view(thread, game, message=message)
+        message_new = await game.new_game()
+        sticky_view: View = self.__build_new_sticky_view(thread, game, message=message_new)
         await thread.send(view=sticky_view)
-        return
+        return await logger.log_success(f"""Un nouveau jeu a démarré. {message_new.jump_url}""")
 
     async def __replay_option(self, interaction: MessageInteraction, button_custom_id: str):
         thread: Thread = interaction.channel
         custom_id_split = button_custom_id.split("|")
         option_type = custom_id_split[1]
+
+        logger = Logger(
+            self.__bot,
+            log_group='Commande',
+            task_info='button.replay.' + option_type,
+        )
+        await logger.log_start(
+            f"""{interaction.author.mention} a demandé un complément dans le replay {interaction.channel.mention}.""")
+        await interaction.response.defer()
+
         game_info = custom_id_split[2]
         game_info_split = game_info.split("_")
         test_id = game_info_split[0]
@@ -366,10 +405,10 @@ class TestReplay(commands.Cog):
         options_left_split = options_left.split("_")
         options_left_split[options.index(option_type)] = str(int(options_left_split[options.index(option_type)]) - 1)
         options_left = "_".join(options_left_split)
-        await game.option(option_type, int(options_left_split[options.index(option_type)]))
+        message: Message = await game.option(option_type, int(options_left_split[options.index(option_type)]))
         sticky_view: View = self.__build_new_sticky_view(thread, game, options_left=options_left)
         await thread.send(view=sticky_view)
-        return
+        return await logger.log_success(f"""Complément affiché. {message.jump_url}""")
 
 
 def setup(bot):
