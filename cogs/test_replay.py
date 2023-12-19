@@ -150,6 +150,7 @@ class TestReplay(commands.Cog):
     def __write_settings(self, name: str) -> None:
         file_path = self.__settings_directory + name + '.yml'
         write_yaml(self.__settings[name], file_path)
+        self.__read_settings()
         return
 
     @staticmethod
