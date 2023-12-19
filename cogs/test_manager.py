@@ -16,6 +16,10 @@ class GameHandler(DynamodbItem):
     def __init__(self, channel_id: str, game_id: int, last_message_id: int = 0):
         super().__init__(f"test_{channel_id}", game_id)
         self.__last_message_id: int = last_message_id
+        self._item = {
+            "item_type": self._item["item_type"],
+            "item_id": self._item["item_id"]
+        }
 
     def add_info(self, info: dict) -> None:
         self._item["info"] = info
