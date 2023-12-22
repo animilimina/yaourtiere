@@ -250,8 +250,9 @@ class TestReplay(commands.Cog):
             message_success=f"""Sticky rafraîchi dans {message.channel.mention}.""",
         )
 
+        sticky_was_updated = False
         async for msg in message.channel.history(limit=100, before=message):
-            if msg.author == self.__bot.user:
+            if msg.author == self.__bot.user and msg.components:
                 view = View()
                 for component in msg.components:
                     for button in component.children:
@@ -263,7 +264,18 @@ class TestReplay(commands.Cog):
                         ))
                 await msg.delete()
                 await message.channel.send(view=view)
+                sticky_was_updated = True
                 break
+
+        if not sticky_was_updated:
+            thread: Thread = message.channel
+            thread_id: str = str(thread.id)
+            settings: dict = self.__check_settings_existence(thread_id)
+            game = GameManager(settings["test_id"], settings["game_id"], self.__guild, thread)
+            sticky_view: View = self.__build_new_sticky_view(thread, game, message=message)
+            await thread.send("Un problème de rafraîchissement des boutons est survenu, ils ont été réinitialisés.")
+            await thread.send(view=sticky_view)
+            await logger.log_message(f"""Le sticky de {thread.mention} a été reconstruit.""")
 
         await logger.log_success()
 
@@ -349,7 +361,6 @@ class TestReplay(commands.Cog):
         if "test_replay" != custom_id[:11]:
             return
         button_type = custom_id.split("|")[1]
-        await interaction.message.delete()
         if button_type == "answer":
             await self.__replay_answer(interaction, custom_id, 'all')
         else:
@@ -373,6 +384,7 @@ class TestReplay(commands.Cog):
         test_id = game_info_split[0]
         game_id = game_info_split[1]
         game = GameManager(test_id, game_id, self.__guild, thread)
+        await interaction.message.delete()
         await thread.send(f"""||{interaction.author.mention} a demandé à afficher la bonne réponse.||""",
                           allowed_mentions=self.__allowed_mentions)
         message_answer: Message = await game.answer()
@@ -412,6 +424,7 @@ class TestReplay(commands.Cog):
         options_left_split = options_left.split("_")
         options_left_split[options.index(option_type)] = str(int(options_left_split[options.index(option_type)]) - 1)
         options_left = "_".join(options_left_split)
+        await interaction.message.delete()
         await thread.send(f"""||{interaction.author.mention} a cliqué pour obtenir l'indice suivant :||""",
                           allowed_mentions=self.__allowed_mentions)
         message: Message = await game.option(option_type, int(options_left_split[options.index(option_type)]))
