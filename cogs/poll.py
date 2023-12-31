@@ -7,7 +7,7 @@ from disnake import AllowedMentions, ApplicationCommandInteraction, Embed, Guild
 from disnake.abc import GuildChannel
 from disnake.ext import commands
 from disnake.ui import Button, View
-from services.dynamodb import DynamodbItem, DynamodbExtractor
+from services.aws.dynamodb import DynamodbItem, DynamodbExtractor
 from time import sleep
 from tools.archivist.logger import Logger
 from tools.directory_managers import create_directory

@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import datetime, timedelta, timezone
-from services.dynamodb import DynamodbExtractor as Extractor
+from services.aws.dynamodb import DynamodbExtractor as Extractor
 
 
 class Reporter:

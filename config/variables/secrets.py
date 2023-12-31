@@ -15,3 +15,6 @@ aws_secret_access_key = os.environ['soj_aws_secret_access_key']
 aws_region_name = os.environ['soj_aws_region_name']
 
 dynamodb_table = os.environ['soj_dynamodb_table']
+s3_bucket = os.environ['soj_s3_bucket']
+
+amplitude_api_key = os.environ['soj_amplitude_api_key']

@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, timezone
-from services.dynamodb import DynamodbItem
+from services.aws.dynamodb import DynamodbItem
 
 
 class Tracker(DynamodbItem):
@@ -22,26 +22,26 @@ class Tracker(DynamodbItem):
 
     def __get_activity_level_one(self) -> str:
         output = self.__default_value
-        if self.__interaction:
-            output = 'interaction'
-        elif 0 <= len(self.__task_info):
+        if 0 < len(self.__task_info):
             output = self.__task_info[0]
+        elif self.__interaction:
+            output = 'interaction'
         return output
 
     def __get_activity_level_two(self) -> str:
         output = self.__default_value
-        if self.__interaction:
-            output = self.__interaction.type[0]
-        elif 1 < len(self.__task_info):
+        if 1 < len(self.__task_info):
             output = self.__task_info[1]
+        elif self.__interaction:
+            output = self.__interaction.type[0]
         return output
 
     def __get_activity_level_three(self) -> str:
         output = self.__default_value
-        if self.__interaction:
-            output = self.__get_interaction_detail()
-        elif 2 < len(self.__task_info):
+        if 2 < len(self.__task_info):
             output = self.__task_info[2]
+        elif self.__interaction:
+            output = self.__get_interaction_detail()
         return output
 
     def __get_interaction_detail(self) -> str:
