@@ -1,16 +1,12 @@
 from boto3.dynamodb.conditions import Key
 from config.variables import secrets
-import boto3
+from services.aws.core import AwsSessionManager
 
 
-class DynamodbManager:
+class DynamodbManager(AwsSessionManager):
     def __init__(self):
-        self.__session = boto3.Session(
-            aws_access_key_id=secrets.aws_access_key_id,
-            aws_secret_access_key=secrets.aws_secret_access_key,
-            region_name=secrets.aws_region_name
-        )
-        self._table = self.__session.resource('dynamodb').Table(secrets.dynamodb_table)
+        AwsSessionManager.__init__(self)
+        self._table = self._session.resource('dynamodb').Table(secrets.dynamodb_table)
 
 
 class DynamodbItem(DynamodbManager):
