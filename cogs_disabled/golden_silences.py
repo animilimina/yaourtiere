@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from disnake import TextInputStyle, Embed
 from disnake.ext import commands
 from disnake.ui import Button, View
-from services.dynamodb import DynamodbItem
+from services.aws.dynamodb import DynamodbItem
 from tools.logger import Logger
 from tools.text_managers import read_yaml
 

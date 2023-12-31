@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from disnake import AllowedMentions, ApplicationCommandInteraction, Guild, Message, Reaction, TextChannel
 from disnake.abc import GuildChannel
 from disnake.ext import commands, tasks
-from services.dynamodb import DynamodbExtractor, DynamodbItem
+from services.aws.dynamodb import DynamodbExtractor, DynamodbItem
 from tools.archivist.logger import Logger
 from tools.directory_managers import create_directory
 from tools.message_splitter import MessageSplitter

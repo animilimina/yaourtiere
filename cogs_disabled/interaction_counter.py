@@ -1,7 +1,7 @@
 import json
 from disnake.ext import commands
 from tools.logger import Logger
-from services.dynamodb import DynamodbItem
+from services.aws.dynamodb import DynamodbItem
 from datetime import datetime, timezone
 
 

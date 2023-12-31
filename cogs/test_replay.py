@@ -1,21 +1,17 @@
 import aiohttp
-import collections
 import io
 import os
 import random
-from datetime import datetime, timedelta
 
 from disnake import AllowedMentions, ApplicationCommandInteraction, ChannelType, File, Guild, Message, \
-    MessageInteraction, Reaction, TextChannel, Thread
-from disnake.abc import GuildChannel
-from disnake.ext import commands, tasks
+    MessageInteraction, TextChannel, Thread
+from disnake.ext import commands
 from disnake.ui import Button, View
 
 from config.variables import constants
-from services.dynamodb import DynamodbExtractor, DynamodbItem
+from services.aws.dynamodb import DynamodbItem
 from tools.archivist.logger import Logger
 from tools.directory_managers import create_directory
-from tools.message_splitter import MessageSplitter
 from tools.text_managers import read_yaml, write_yaml
 
 

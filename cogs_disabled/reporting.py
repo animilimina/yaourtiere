@@ -2,7 +2,7 @@ import disnake
 import inspect
 from disnake.ext import commands, tasks
 from tools.logger import Logger
-from services.dynamodb import DynamodbExtractor, DynamodbItem
+from services.aws.dynamodb import DynamodbExtractor, DynamodbItem
 from datetime import datetime, timedelta, timezone
 
 
