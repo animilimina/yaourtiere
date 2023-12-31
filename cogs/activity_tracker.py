@@ -11,8 +11,6 @@ class ActivityTracker(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: Message):
-        if self.__there_is_nothing_to_do(message):
-            return
         event = {
 
             "user_id": str(message.author.id),
@@ -38,11 +36,6 @@ class ActivityTracker(commands.Cog):
         tracker = amplitude.AmplitudeManager()
         tracker.track(event)
         return
-
-    def __there_is_nothing_to_do(self, message: Message) -> bool:
-        if message.author == self.__bot.user:
-            return True
-        return False
 
 
 def setup(bot):
