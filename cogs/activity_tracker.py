@@ -21,7 +21,6 @@ class ActivityTracker(commands.Cog):
     async def on_message(self, message: Message):
         if self.__there_is_nothing_to_do(message):
             return
-        print('message')
         event = {
             "event_type": "Message",
             "user_id": str(message.author.id),
