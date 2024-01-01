@@ -10,8 +10,18 @@ class ActivityTracker(commands.Cog):
         self.__bot: commands.InteractionBot = bot
         self.__guild: Guild = self.__bot.guilds[0]
 
+    def __there_is_nothing_to_do(self, message: Message) -> bool:
+        if not message.guild:
+            return True
+        if message.guild != self.__guild:
+            return True
+        return False
+
     @commands.Cog.listener()
     async def on_message(self, message: Message):
+        if self.__there_is_nothing_to_do(message):
+            return
+        print('message')
         event = {
             "event_type": "Message",
             "user_id": str(message.author.id),
@@ -41,7 +51,8 @@ class ActivityTracker(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: Message, after: Message):
-
+        if self.__there_is_nothing_to_do(message):
+            return
         event = {
             "event_type": "Message Edit",
             "user_id": str(after.author.id),
