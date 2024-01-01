@@ -1,4 +1,5 @@
-from disnake import Guild, Message
+from datetime import datetime, timezone
+from disnake import Guild, Member, Message
 from disnake.ext import commands
 import math
 from services.Amplitude import core as amplitude
@@ -12,11 +13,10 @@ class ActivityTracker(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: Message):
         event = {
-
+            "event_type": "Message",
             "user_id": str(message.author.id),
             "device_id": str(message.author.id),
             "time": math.floor(message.created_at.timestamp() * 1000),
-            "event_type": "Message",
             "user_properties": {
                 "username": message.author.display_name,
                 "role": [x.name for x in message.author.roles],
@@ -24,15 +24,64 @@ class ActivityTracker(commands.Cog):
                 "is_bot": message.author.bot
             },
             "event_properties": {
-                "channel_id": message.channel.id,
+                "action": "create",
+                "channel_id": str(message.channel.id),
                 "channel_name": message.channel.name,
-                "parent_id": message.channel.parent.id if hasattr(message.channel, 'parent') else message.channel.id,
+                "parent_id": str(message.channel.parent.id if hasattr(message.channel, 'parent') else message.channel.id),
                 "parent_name": message.channel.parent.name if hasattr(message.channel, 'parent') else message.channel.name,
                 "characters": len(message.content),
-                "attachments": len(message.attachments)
+                "attachments": len(message.attachments),
+                "message_id": str(message.id)
             }
         }
 
+        tracker = amplitude.AmplitudeManager()
+        tracker.track(event)
+        return
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before: Message, after: Message):
+
+        event = {
+            "event_type": "Message Edit",
+            "user_id": str(after.author.id),
+            "device_id": str(after.author.id),
+            "time": math.floor(after.edited_at.timestamp() * 1000),
+            "user_properties": {
+                "username": after.author.display_name,
+                "role": [x.name for x in after.author.roles],
+                "top_role": after.author.top_role.name,
+                "is_bot": after.author.bot
+            },
+            "event_properties": {
+                "action": "edit",
+                "channel_id": str(after.channel.id),
+                "channel_name": after.channel.name,
+                "parent_id": str(after.channel.parent.id if hasattr(after.channel, 'parent') else after.channel.id),
+                "parent_name": after.channel.parent.name if hasattr(after.channel, 'parent') else after.channel.name,
+                "characters": len(after.content),
+                "attachments": len(after.attachments),
+                "message_id": str(after.id)
+            }
+        }
+        tracker = amplitude.AmplitudeManager()
+        tracker.track(event)
+        return
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member: Member):
+        event = {
+            "event_type": "Member Join",
+            "user_id": str(member.id),
+            "device_id": str(member.id),
+            "time": math.floor(member.joined_at.timestamp() * 1000),
+            "user_properties": {
+                "username": member.display_name,
+                "role": [x.name for x in member.roles],
+                "top_role": member.top_role.name,
+                "is_bot": member.bot
+            }
+        }
         tracker = amplitude.AmplitudeManager()
         tracker.track(event)
         return
