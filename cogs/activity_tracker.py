@@ -47,7 +47,7 @@ class ActivityTracker(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, before: Message, after: Message):
-        if self.__there_is_nothing_to_do(message):
+        if self.__there_is_nothing_to_do(after):
             return
         event = {
             "event_type": "Message Edit",
