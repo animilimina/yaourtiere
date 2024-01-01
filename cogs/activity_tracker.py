@@ -33,7 +33,6 @@ class ActivityTracker(commands.Cog):
                 "is_bot": message.author.bot
             },
             "event_properties": {
-                "action": "create",
                 "channel_id": str(message.channel.id),
                 "channel_name": message.channel.name,
                 "parent_id": str(message.channel.parent.id if hasattr(message.channel, 'parent') else message.channel.id),
@@ -64,7 +63,6 @@ class ActivityTracker(commands.Cog):
                 "is_bot": after.author.bot
             },
             "event_properties": {
-                "action": "edit",
                 "channel_id": str(after.channel.id),
                 "channel_name": after.channel.name,
                 "parent_id": str(after.channel.parent.id if hasattr(after.channel, 'parent') else after.channel.id),
