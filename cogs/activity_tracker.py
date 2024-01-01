@@ -21,6 +21,7 @@ class ActivityTracker(commands.Cog):
     async def on_message(self, message: Message):
         if self.__there_is_nothing_to_do(message):
             return
+        print(message.id)
         event = {
             "event_type": "Message",
             "user_id": str(message.author.id),
@@ -37,8 +38,6 @@ class ActivityTracker(commands.Cog):
                 "channel_name": message.channel.name,
                 "parent_id": str(message.channel.parent.id if hasattr(message.channel, 'parent') else message.channel.id),
                 "parent_name": message.channel.parent.name if hasattr(message.channel, 'parent') else message.channel.name,
-                "characters": len(message.content),
-                "attachments": len(message.attachments),
                 "message_id": str(message.id)
             }
         }
@@ -67,8 +66,6 @@ class ActivityTracker(commands.Cog):
                 "channel_name": after.channel.name,
                 "parent_id": str(after.channel.parent.id if hasattr(after.channel, 'parent') else after.channel.id),
                 "parent_name": after.channel.parent.name if hasattr(after.channel, 'parent') else after.channel.name,
-                "characters": len(after.content),
-                "attachments": len(after.attachments),
                 "message_id": str(after.id)
             }
         }
