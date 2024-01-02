@@ -26,7 +26,7 @@ class CogManager(commands.Cog):
 
     def __refresh_cog_list(self):
         cog_dir = self.__cog_directory
-        self.__cog_list = [x.split('.')[0] for x in os.listdir(cog_dir) if os.path.isfile(f'{cog_dir}/{x}')]
+        self.__cog_list = [x.split('.')[0] for x in os.listdir(cog_dir) if os.path.isfile(f'{cog_dir}/{x}') and x.split('.')[1]=='py']
 
     def __load_all_cogs(self):
         self.__cogs_loaded = []
