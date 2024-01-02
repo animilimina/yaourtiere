@@ -45,32 +45,32 @@ class ActivityTracker(commands.Cog):
         tracker.track(event)
         return
 
-    @commands.Cog.listener()
-    async def on_message_edit(self, before: Message, after: Message):
-        if self.__there_is_nothing_to_do(after):
-            return
-        event = {
-            "event_type": "Message Edit",
-            "user_id": str(after.author.id),
-            "device_id": str(after.author.id),
-            "time": math.floor(after.edited_at.timestamp() * 1000),
-            "user_properties": {
-                "username": after.author.display_name,
-                "role": [x.name for x in after.author.roles],
-                "top_role": after.author.top_role.name,
-                "is_bot": after.author.bot
-            },
-            "event_properties": {
-                "channel_id": str(after.channel.id),
-                "channel_name": after.channel.name,
-                "parent_id": str(after.channel.parent.id if hasattr(after.channel, 'parent') else after.channel.id),
-                "parent_name": after.channel.parent.name if hasattr(after.channel, 'parent') else after.channel.name,
-                "message_id": str(after.id)
-            }
-        }
-        tracker = amplitude.AmplitudeManager()
-        tracker.track(event)
-        return
+    # @commands.Cog.listener()
+    # async def on_message_edit(self, before: Message, after: Message):
+    #     if self.__there_is_nothing_to_do(after):
+    #         return
+    #     event = {
+    #         "event_type": "Message Edit",
+    #         "user_id": str(after.author.id),
+    #         "device_id": str(after.author.id),
+    #         "time": math.floor(datetime.now(tz=timezone.utc).timestamp() * 1000),
+    #         "user_properties": {
+    #             "username": after.author.display_name,
+    #             "role": [x.name for x in after.author.roles],
+    #             "top_role": after.author.top_role.name,
+    #             "is_bot": after.author.bot
+    #         },
+    #         "event_properties": {
+    #             "channel_id": str(after.channel.id),
+    #             "channel_name": after.channel.name,
+    #             "parent_id": str(after.channel.parent.id if hasattr(after.channel, 'parent') else after.channel.id),
+    #             "parent_name": after.channel.parent.name if hasattr(after.channel, 'parent') else after.channel.name,
+    #             "message_id": str(after.id)
+    #         }
+    #     }
+    #     tracker = amplitude.AmplitudeManager()
+    #     tracker.track(event)
+    #     return
 
     @commands.Cog.listener()
     async def on_member_join(self, member: Member):
